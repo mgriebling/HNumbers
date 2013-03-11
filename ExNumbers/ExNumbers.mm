@@ -56,6 +56,10 @@
     return [[ExNumbers alloc] initFromMPComplex:complex];
 }
 
++ (id)numberFromExNumber:(ExNumbers *)exNumber {
+    return [[ExNumbers alloc] initFromExNumber:exNumber];
+}
+
 - (id)initFromString:(NSString *)real imaginaryString:(NSString *)imaginary {
     mp_real realNum = mp_real([real cStringUsingEncoding:NSASCIIStringEncoding]);
     mp_real imagNum = mp_real([imaginary cStringUsingEncoding:NSASCIIStringEncoding]);
@@ -158,5 +162,95 @@
     return [ExNumbers numberFromMPComplex:exp(self->num)];
 }
 
+- (ExNumbers *)tangent {
+    mp_complex_temp sine = sin(num);
+    mp_complex_temp cosine = cos(num);
+    return [ExNumbers numberFromMPComplex:sine/cosine];
+}
+
+- (ExNumbers *)hyperbolicSine {
+    // FIX ME
+    return [ExNumbers numberFromExComplex:sinh(num.real) imaginary:mp_real(0.0)];
+}
+
+- (ExNumbers *)hyperbolicCosine {
+    // FIX ME
+    return [ExNumbers numberFromExComplex:cosh(num.real) imaginary:mp_real(0.0)];
+}
+
+- (ExNumbers *)hyperbolicTangent {
+    // FIX ME
+    return [ExNumbers numberFromExComplex:tanh(num.real) imaginary:mp_real(0.0)];
+}
+
+- (ExNumbers *)arcTangent {
+    // FIX ME
+    return [ExNumbers numberFromExComplex:atan(num.real) imaginary:mp_real(0.0)];
+}
+
+- (ExNumbers *)arcTangentWithY:(ExNumbers *)y  {
+    // FIX ME
+    return [ExNumbers numberFromExComplex:atan2(y->num.real, num.real) imaginary:mp_real(0.0)];
+}
+
+- (ExNumbers *)arcSine  {
+    // FIX ME
+    return [ExNumbers numberFromExComplex:asin(num.real) imaginary:mp_real(0.0)];
+}
+
+- (ExNumbers *)arcCosine  {
+    // FIX ME
+    return [ExNumbers numberFromExComplex:acos(num.real) imaginary:mp_real(0.0)];
+}
+
+- (ExNumbers *)random  {
+    return [ExNumbers numberFromExComplex:mp_rand() imaginary:mp_rand()];
+}
+
+- (ExNumbers *)floatingModulus:(ExNumbers *)modulus  {
+    // FIX ME
+    return [ExNumbers numberFromExComplex:fmod(num.real, modulus->num.real) imaginary:mp_real(0.0)];
+}
+
+- (BOOL)isEqual:(id)object {
+    if ([object isKindOfClass:[ExNumbers class]]) {
+        ExNumbers *number = object;
+        return num == number->num;
+    }
+    return  NO;
+}
+
+- (BOOL)isGreaterThan:(ExNumbers *)object  {
+    return  abs(num) > abs(self->num);
+}
+
+- (BOOL)isLessThan:(ExNumbers *)object  {
+    return  abs(num) < abs(self->num);
+}
+
+- (NSString *)stringFromNumber:(mp_real)real {
+    std::string str = real.to_string();
+    return [NSString stringWithCString:str.c_str() encoding:NSASCIIStringEncoding];
+}
+
+- (NSString *)description {
+    if (num.imag == 0) {
+        return [NSString stringWithFormat:@"%@", [self stringFromNumber:num.real]];
+    } else if (num.real == 0) {
+        return [NSString stringWithFormat:@"%@i", [self stringFromNumber:num.imag]];
+    } else {
+        return [NSString stringWithFormat:@"%@%@i", [self stringFromNumber:num.real], [self stringFromNumber:num.imag]];
+    }
+}
+
+- (NSString *)stringWithBase:(NSUInteger)base andFormat:(NumberFormat)format {
+    // TBD
+    return @"TBD";
+}
+
+
+- (ExNumbers *)integer {
+    return [ExNumbers numberFromExComplex:anint(abs(num)) imaginary:mp_real(0.0)];
+}
 
 @end
