@@ -1,5 +1,0 @@
-fpu.lo fpu.o: fpu.cpp ../config.h ../include/arprec/fpu.h
-
-../config.h:
-
-../include/arprec/fpu.h:

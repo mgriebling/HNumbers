@@ -8,64 +8,38 @@
 
 #import "ExNumbers.h"
 #import "mp_complex.h"
+#import "mp_int.h"
 
-@implementation ExNumbers {
-    mp_complex num;
-}
+@interface ExNumbers ()
+@property (nonatomic)mp_complex num;
+@end
 
-static BOOL libInitialized = NO;
+@implementation ExNumbers
 
-#define DEFAULT_DIGITS  16
+static NSInteger libDigits = 0;
 
 + (void)initWithDigits:(NSUInteger)digits {
-    if (!libInitialized) {
+    if (libDigits != digits) {
         // need to initialize the base library constants and precision
         mp::mp_init(digits);
-        libInitialized = YES;
+        libDigits = digits;
     }
 }
 
-+ (mp_real)mp_zero {
-    [ExNumbers initWithDigits:DEFAULT_DIGITS];
-    return mp_real(0.0);
-}
-
-+ (mp_real)mp_pi {
-    [ExNumbers initWithDigits:DEFAULT_DIGITS];
-    return mp_real::_pi;
-}
-
-+ (mp_real)mp_log2 {
-    [ExNumbers initWithDigits:DEFAULT_DIGITS];
-    return mp_real::_log2;
-}
-
-+ (mp_real)mp_log10 {
-    [ExNumbers initWithDigits:DEFAULT_DIGITS];
-    return mp_real::_log10;
-}
-
-+ (mp_real)mp_eps {
-    [ExNumbers initWithDigits:DEFAULT_DIGITS];
-    return mp_real::_eps;
-}
+// default initializer
 
 - (id)initFromMPComplex:(mp_complex)complex {
     self = [super init];
-    if (self) {
-        [ExNumbers initWithDigits:DEFAULT_DIGITS];
-        num = complex;
-    }
+    if (self) _num = complex;
     return self;
 }
 
 - (id)initFromExNumber:(ExNumbers *)exNumber {
-    return [self initFromMPComplex:exNumber->num];
+    return [self initFromMPComplex:exNumber.num];
 }
 
 - (id)initFromInteger:(NSInteger)integer {
-    mp_complex x = mp_complex(mp_real(integer), [ExNumbers mp_zero]);
-    return [self initFromMPComplex:x];
+    return [self initFromMPComplex:mp_complex(mp_int(integer), mp_int(0))];
 }
 
 - (id)initFromDouble:(double)number {
@@ -73,18 +47,15 @@ static BOOL libInitialized = NO;
 }
 
 - (id)initFromComplex:(double)real imaginary:(double)imaginary {
-    mp_complex x = mp_complex(mp_real(real), mp_real(imaginary));
-    return [self initFromMPComplex:x];
+    return [self initFromMPComplex:mp_complex(mp_real(real), mp_real(imaginary))];
 }
 
 - (id)initFromExComplex:(mp_real)real imaginary:(mp_real)imaginary {
-    mp_complex x = mp_complex(real, imaginary);
-    return [self initFromMPComplex:x];
+    return [self initFromMPComplex:mp_complex(real, imaginary)];
 }
 
 - (id)initFromMPReal:(mp_real)real {
-    mp_complex x = mp_complex(real, [ExNumbers mp_zero]);
-    return [self initFromMPComplex:x];
+    return [self initFromMPComplex:mp_complex(real, mp_int(0))];
 }
 
 + (id)numberFromExComplex:(mp_real)real imaginary:(mp_real)imaginary {
@@ -118,27 +89,27 @@ static BOOL libInitialized = NO;
 }
 
 + (id)pi {
-    return [ExNumbers numberFromMPReal:[ExNumbers mp_pi]];
+    return [ExNumbers numberFromMPReal:mp_real::_pi];
 }
 
 + (id)log2 {
-    return  [ExNumbers numberFromMPReal:[ExNumbers mp_log2]];
+    return  [ExNumbers numberFromMPReal:mp_real::_log2];
 }
 
 + (id)log10 {
-    return  [ExNumbers numberFromMPReal:[ExNumbers mp_log10]];
+    return  [ExNumbers numberFromMPReal:mp_real::_log10];
 }
 
 + (id)eps {
-    return  [ExNumbers numberFromMPReal:[ExNumbers mp_eps]];
+    return  [ExNumbers numberFromMPReal:mp_real::_eps];
 }
 
 - (ExNumbers *)real {
-    return [ExNumbers numberFromMPReal:num.real];
+    return [ExNumbers numberFromMPReal:self.num.real];
 }
 
 - (ExNumbers *)imaginary {
-    return [ExNumbers numberFromMPReal:num.imag];
+    return [ExNumbers numberFromMPReal:self.num.imag];
 }
 
 + (id)numberFromInteger:(NSInteger)integer {
@@ -154,100 +125,100 @@ static BOOL libInitialized = NO;
 }
 
 - (ExNumbers *)add:(ExNumbers *)complex {
-    return [ExNumbers numberFromMPComplex:num + complex->num];
+    return [ExNumbers numberFromMPComplex:self.num + complex.num];
 }
 
 - (ExNumbers *)subtract:(ExNumbers *)complex {
-    return [ExNumbers numberFromMPComplex:num - complex->num];
+    return [ExNumbers numberFromMPComplex:self.num - complex.num];
 }
 
 - (ExNumbers *)multiply:(ExNumbers *)complex {
-    return [ExNumbers numberFromMPComplex:num * complex->num];
+    return [ExNumbers numberFromMPComplex:self.num * complex.num];
 }
 
 - (ExNumbers *)divide:(ExNumbers *)complex {
-    return [ExNumbers numberFromMPComplex:num / complex->num];
+    return [ExNumbers numberFromMPComplex:self.num / complex.num];
 }
 
 - (ExNumbers *)exponential {
-    return [ExNumbers numberFromMPComplex:exp(self->num)];
+    return [ExNumbers numberFromMPComplex:exp(self.num)];
 }
 
 - (ExNumbers *)naturalLogarithm {
-    return [ExNumbers numberFromMPComplex:log(self->num)];
+    return [ExNumbers numberFromMPComplex:log(self.num)];
 }
 
 - (ExNumbers *)base10Logarithm {
-    return [ExNumbers numberFromMPComplex:log(self->num)/mp_real::_log10];
+    return [ExNumbers numberFromMPComplex:log(self.num)/mp_real::_log10];
 }
 
 - (ExNumbers *)sine {
-    return [ExNumbers numberFromMPComplex:sin(self->num)];
+    return [ExNumbers numberFromMPComplex:sin(self.num)];
 }
 
 - (ExNumbers *)cosine {
-    return [ExNumbers numberFromMPComplex:cos(self->num)];
+    return [ExNumbers numberFromMPComplex:cos(self.num)];
 }
 
 - (ExNumbers *)squared {
-    return [ExNumbers numberFromMPComplex:sqr(self->num)];
+    return [ExNumbers numberFromMPComplex:sqr(self.num)];
 }
 
 - (ExNumbers *)squareRoot {
-    return [ExNumbers numberFromMPComplex:sqrt(self->num)];
+    return [ExNumbers numberFromMPComplex:sqrt(self.num)];
 }
 
 - (ExNumbers *)absolute {
-    return [ExNumbers numberFromMPReal:abs(self->num)];
+    return [ExNumbers numberFromMPReal:abs(self.num)];
 }
 
 - (ExNumbers *)argument {
-    return [ExNumbers numberFromMPReal:arg(self->num)];
+    return [ExNumbers numberFromMPReal:arg(self.num)];
 }
 
 - (ExNumbers *)powerToExponent:(ExNumbers *)exponent {
-    return [ExNumbers numberFromMPComplex:exp(self->num)];
+    return [ExNumbers numberFromMPComplex:exp(self.num)];
 }
 
 - (ExNumbers *)tangent {
-    mp_complex_temp sine = sin(num);
-    mp_complex_temp cosine = cos(num);
+    mp_complex_temp sine = sin(self.num);
+    mp_complex_temp cosine = cos(self.num);
     return [ExNumbers numberFromMPComplex:sine/cosine];
 }
 
 - (ExNumbers *)hyperbolicSine {
     // FIX ME
-    return [ExNumbers numberFromMPReal:sinh(num.real)];
+    return [ExNumbers numberFromMPReal:sinh(self.num.real)];
 }
 
 - (ExNumbers *)hyperbolicCosine {
     // FIX ME
-    return [ExNumbers numberFromMPReal:cosh(num.real)];
+    return [ExNumbers numberFromMPReal:cosh(self.num.real)];
 }
 
 - (ExNumbers *)hyperbolicTangent {
     // FIX ME
-    return [ExNumbers numberFromMPReal:tanh(num.real)];
+    return [ExNumbers numberFromMPReal:tanh(self.num.real)];
 }
 
 - (ExNumbers *)arcTangent {
     // FIX ME
-    return [ExNumbers numberFromMPReal:atan(num.real)];
+    return [ExNumbers numberFromMPReal:atan(self.num.real)];
 }
 
 - (ExNumbers *)arcTangentWithY:(ExNumbers *)y  {
     // FIX ME
-    return [ExNumbers numberFromMPReal:atan2(y->num.real, num.real)];
+    return [ExNumbers numberFromMPReal:atan2(y.num.real, self.num.real)];
 }
 
 - (ExNumbers *)arcSine  {
     // FIX ME
-    return [ExNumbers numberFromMPReal:asin(num.real)];
+    return [ExNumbers numberFromMPReal:asin(self.num.real)];
 }
 
 - (ExNumbers *)arcCosine  {
     // FIX ME
-    return [ExNumbers numberFromMPReal:acos(num.real)];
+    return [ExNumbers numberFromMPReal:acos(self.num.real)];
 }
 
 - (ExNumbers *)random  {
@@ -256,22 +227,22 @@ static BOOL libInitialized = NO;
 
 - (ExNumbers *)floatingModulus:(ExNumbers *)modulus  {
     // FIX ME
-    return [ExNumbers numberFromMPReal:fmod(num.real, modulus->num.real)];
+    return [ExNumbers numberFromMPReal:fmod(self.num.real, modulus.num.real)];
 }
 
 - (BOOL)isEqual:(id)object {
     if ([object isKindOfClass:[ExNumbers class]]) {
-        return num == ((ExNumbers *)object)->num;
+        return self.num == ((ExNumbers *)object).num;
     }
     return  NO;
 }
 
 - (BOOL)isGreaterThan:(ExNumbers *)object  {
-    return  abs(num) > abs(self->num);
+    return  abs(self.num) > abs(object.num);
 }
 
 - (BOOL)isLessThan:(ExNumbers *)object  {
-    return  abs(num) < abs(self->num);
+    return  abs(self.num) < abs(object.num);
 }
 
 - (NSString *)stringFromNumber:(mp_real)real {
@@ -279,16 +250,19 @@ static BOOL libInitialized = NO;
     NSString *trunc = [str substringFromIndex:5];
     NSRange location = [trunc rangeOfString:@" x"];
     NSString *exp = [trunc substringToIndex:location.location];
-    return [NSString stringWithFormat:@"%@ x 10 ^ %@", [trunc substringFromIndex:location.location], exp];
+    if (exp.integerValue == 0) return [trunc substringFromIndex:location.location+3];
+    else return [NSString stringWithFormat:@"%@×10^%@", [trunc substringFromIndex:location.location+3], exp];
 }
 
 - (NSString *)description {
-    if (num.imag == 0) {
-        return [NSString stringWithFormat:@"%@", [self stringFromNumber:num.real]];
-    } else if (num.real == 0) {
-        return [NSString stringWithFormat:@"%@i", [self stringFromNumber:num.imag]];
+    if (self.num.imag == 0) {
+        return [NSString stringWithFormat:@"%@", [self stringFromNumber:self.num.real]];
+    } else if (self.num.real == 0) {
+        return [NSString stringWithFormat:@"%@i", [self stringFromNumber:self.num.imag]];
     } else {
-        return [NSString stringWithFormat:@"%@%@i", [self stringFromNumber:num.real], [self stringFromNumber:num.imag]];
+        NSString *sign = self.num.imag > 0 ? @"+" : @"-";
+        NSString *imag = abs(self.num.imag) == 1 ? @"" : [self stringFromNumber:abs(self.num.imag)];
+        return [NSString stringWithFormat:@"%@ %@ %@i", [self stringFromNumber:self.num.real], sign, imag];
     }
 }
 
@@ -299,7 +273,7 @@ static BOOL libInitialized = NO;
 
 
 - (ExNumbers *)integer {
-    return [ExNumbers numberFromExComplex:anint(abs(num)) imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:anint(abs(self.num))];
 }
 
 @end
