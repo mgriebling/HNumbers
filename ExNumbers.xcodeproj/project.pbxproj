@@ -7,9 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2FD65C8716EF46DE003F8FC1 /* ExNumbers.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2FD65C8616EF46DE003F8FC1 /* ExNumbers.mm */; };
 		47B35FFC16ECE052007ECCC9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47B35FFB16ECE052007ECCC9 /* Foundation.framework */; };
-		47B3600116ECE052007ECCC9 /* ExNumbers.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 47B3600016ECE052007ECCC9 /* ExNumbers.h */; };
-		47B3600316ECE052007ECCC9 /* ExNumbers.mm in Sources */ = {isa = PBXBuildFile; fileRef = 47B3600216ECE052007ECCC9 /* ExNumbers.mm */; };
 		47B360AB16ECE1CD007ECCC9 /* add.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47B3605916ECE1CD007ECCC9 /* add.cpp */; };
 		47B360AC16ECE1CD007ECCC9 /* agmx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47B3605A16ECE1CD007ECCC9 /* agmx.cpp */; };
 		47B360AD16ECE1CD007ECCC9 /* ang.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47B3605B16ECE1CD007ECCC9 /* ang.cpp */; };
@@ -96,18 +95,17 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
-				47B3600116ECE052007ECCC9 /* ExNumbers.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2FD65C8616EF46DE003F8FC1 /* ExNumbers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ExNumbers.mm; sourceTree = "<group>"; };
+		2FD65C8816EF46F0003F8FC1 /* ExNumbers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExNumbers.h; path = src/ExNumbers.h; sourceTree = "<group>"; };
 		47B35FF816ECE052007ECCC9 /* libExNumbers.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libExNumbers.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		47B35FFB16ECE052007ECCC9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		47B35FFF16ECE052007ECCC9 /* ExNumbers-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ExNumbers-Prefix.pch"; sourceTree = "<group>"; };
-		47B3600016ECE052007ECCC9 /* ExNumbers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExNumbers.h; sourceTree = "<group>"; };
-		47B3600216ECE052007ECCC9 /* ExNumbers.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ExNumbers.mm; sourceTree = "<group>"; };
 		47B3605916ECE1CD007ECCC9 /* add.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = add.cpp; sourceTree = "<group>"; };
 		47B3605A16ECE1CD007ECCC9 /* agmx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = agmx.cpp; sourceTree = "<group>"; };
 		47B3605B16ECE1CD007ECCC9 /* ang.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ang.cpp; sourceTree = "<group>"; };
@@ -245,8 +243,8 @@
 			children = (
 				47B360FA16ECE1E5007ECCC9 /* include */,
 				47B3600916ECE1CD007ECCC9 /* src */,
-				47B3600016ECE052007ECCC9 /* ExNumbers.h */,
-				47B3600216ECE052007ECCC9 /* ExNumbers.mm */,
+				2FD65C8616EF46DE003F8FC1 /* ExNumbers.mm */,
+				2FD65C8816EF46F0003F8FC1 /* ExNumbers.h */,
 				47B35FFE16ECE052007ECCC9 /* Supporting Files */,
 			);
 			path = ExNumbers;
@@ -426,7 +424,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47B3600316ECE052007ECCC9 /* ExNumbers.mm in Sources */,
 				47B360AB16ECE1CD007ECCC9 /* add.cpp in Sources */,
 				47B360AC16ECE1CD007ECCC9 /* agmx.cpp in Sources */,
 				47B360AD16ECE1CD007ECCC9 /* ang.cpp in Sources */,
@@ -504,6 +501,7 @@
 				47B360F716ECE1CD007ECCC9 /* sub.cpp in Sources */,
 				47B360F816ECE1CD007ECCC9 /* to_digits.cpp in Sources */,
 				47B360F916ECE1CD007ECCC9 /* write.cpp in Sources */,
+				2FD65C8716EF46DE003F8FC1 /* ExNumbers.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -13,9 +13,47 @@
     mp_complex num;
 }
 
+static BOOL libInitialized = NO;
+
+#define DEFAULT_DIGITS  16
+
++ (void)initWithDigits:(NSUInteger)digits {
+    if (!libInitialized) {
+        // need to initialize the base library constants and precision
+        mp::mp_init(digits);
+        libInitialized = YES;
+    }
+}
+
++ (mp_real)mp_zero {
+    [ExNumbers initWithDigits:DEFAULT_DIGITS];
+    return mp_real(0.0);
+}
+
++ (mp_real)mp_pi {
+    [ExNumbers initWithDigits:DEFAULT_DIGITS];
+    return mp_real::_pi;
+}
+
++ (mp_real)mp_log2 {
+    [ExNumbers initWithDigits:DEFAULT_DIGITS];
+    return mp_real::_log2;
+}
+
++ (mp_real)mp_log10 {
+    [ExNumbers initWithDigits:DEFAULT_DIGITS];
+    return mp_real::_log10;
+}
+
++ (mp_real)mp_eps {
+    [ExNumbers initWithDigits:DEFAULT_DIGITS];
+    return mp_real::_eps;
+}
+
 - (id)initFromMPComplex:(mp_complex)complex {
     self = [super init];
     if (self) {
+        [ExNumbers initWithDigits:DEFAULT_DIGITS];
         num = complex;
     }
     return self;
@@ -26,7 +64,7 @@
 }
 
 - (id)initFromInteger:(NSInteger)integer {
-    mp_complex x = mp_complex(mp_real(integer), mp_real(0.0));
+    mp_complex x = mp_complex(mp_real(integer), [ExNumbers mp_zero]);
     return [self initFromMPComplex:x];
 }
 
@@ -41,6 +79,11 @@
 
 - (id)initFromExComplex:(mp_real)real imaginary:(mp_real)imaginary {
     mp_complex x = mp_complex(real, imaginary);
+    return [self initFromMPComplex:x];
+}
+
+- (id)initFromMPReal:(mp_real)real {
+    mp_complex x = mp_complex(real, [ExNumbers mp_zero]);
     return [self initFromMPComplex:x];
 }
 
@@ -60,6 +103,10 @@
     return [[ExNumbers alloc] initFromExNumber:exNumber];
 }
 
++ (id)numberFromMPReal:(mp_real)real {
+    return [[ExNumbers alloc] initFromMPReal:real];
+}
+
 - (id)initFromString:(NSString *)real imaginaryString:(NSString *)imaginary {
     mp_real realNum = mp_real([real cStringUsingEncoding:NSASCIIStringEncoding]);
     mp_real imagNum = mp_real([imaginary cStringUsingEncoding:NSASCIIStringEncoding]);
@@ -67,31 +114,31 @@
 }
 
 + (id)zero {
-    return [[ExNumbers alloc] initFromInteger:0];
+    return [ExNumbers numberFromInteger:0];
 }
 
 + (id)pi {
-    return [[ExNumbers alloc] initFromExComplex:mp_real::_pi imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:[ExNumbers mp_pi]];
 }
 
 + (id)log2 {
-    return [[ExNumbers alloc] initFromExComplex:mp_real::_log2 imaginary:mp_real(0.0)];
+    return  [ExNumbers numberFromMPReal:[ExNumbers mp_log2]];
 }
 
 + (id)log10 {
-    return [[ExNumbers alloc] initFromExComplex:mp_real::_log10 imaginary:mp_real(0.0)];
+    return  [ExNumbers numberFromMPReal:[ExNumbers mp_log10]];
 }
 
 + (id)eps {
-    return [[ExNumbers alloc] initFromExComplex:mp_real::_eps imaginary:mp_real(0.0)];
+    return  [ExNumbers numberFromMPReal:[ExNumbers mp_eps]];
 }
 
 - (ExNumbers *)real {
-    return [[ExNumbers alloc] initFromExComplex:num.real imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:num.real];
 }
 
 - (ExNumbers *)imaginary {
-    return [[ExNumbers alloc] initFromExComplex:num.imag imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:num.imag];
 }
 
 + (id)numberFromInteger:(NSInteger)integer {
@@ -151,11 +198,11 @@
 }
 
 - (ExNumbers *)absolute {
-    return [ExNumbers numberFromExComplex:abs(self->num) imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:abs(self->num)];
 }
 
 - (ExNumbers *)argument {
-    return [ExNumbers numberFromExComplex:arg(self->num) imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:arg(self->num)];
 }
 
 - (ExNumbers *)powerToExponent:(ExNumbers *)exponent {
@@ -170,37 +217,37 @@
 
 - (ExNumbers *)hyperbolicSine {
     // FIX ME
-    return [ExNumbers numberFromExComplex:sinh(num.real) imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:sinh(num.real)];
 }
 
 - (ExNumbers *)hyperbolicCosine {
     // FIX ME
-    return [ExNumbers numberFromExComplex:cosh(num.real) imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:cosh(num.real)];
 }
 
 - (ExNumbers *)hyperbolicTangent {
     // FIX ME
-    return [ExNumbers numberFromExComplex:tanh(num.real) imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:tanh(num.real)];
 }
 
 - (ExNumbers *)arcTangent {
     // FIX ME
-    return [ExNumbers numberFromExComplex:atan(num.real) imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:atan(num.real)];
 }
 
 - (ExNumbers *)arcTangentWithY:(ExNumbers *)y  {
     // FIX ME
-    return [ExNumbers numberFromExComplex:atan2(y->num.real, num.real) imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:atan2(y->num.real, num.real)];
 }
 
 - (ExNumbers *)arcSine  {
     // FIX ME
-    return [ExNumbers numberFromExComplex:asin(num.real) imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:asin(num.real)];
 }
 
 - (ExNumbers *)arcCosine  {
     // FIX ME
-    return [ExNumbers numberFromExComplex:acos(num.real) imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:acos(num.real)];
 }
 
 - (ExNumbers *)random  {
@@ -209,13 +256,12 @@
 
 - (ExNumbers *)floatingModulus:(ExNumbers *)modulus  {
     // FIX ME
-    return [ExNumbers numberFromExComplex:fmod(num.real, modulus->num.real) imaginary:mp_real(0.0)];
+    return [ExNumbers numberFromMPReal:fmod(num.real, modulus->num.real)];
 }
 
 - (BOOL)isEqual:(id)object {
     if ([object isKindOfClass:[ExNumbers class]]) {
-        ExNumbers *number = object;
-        return num == number->num;
+        return num == ((ExNumbers *)object)->num;
     }
     return  NO;
 }
@@ -229,8 +275,11 @@
 }
 
 - (NSString *)stringFromNumber:(mp_real)real {
-    std::string str = real.to_string();
-    return [NSString stringWithCString:str.c_str() encoding:NSASCIIStringEncoding];
+    NSString *str = [NSString stringWithCString:real.to_string().c_str() encoding:NSASCIIStringEncoding];
+    NSString *trunc = [str substringFromIndex:5];
+    NSRange location = [trunc rangeOfString:@" x"];
+    NSString *exp = [trunc substringToIndex:location.location];
+    return [NSString stringWithFormat:@"%@ x 10 ^ %@", [trunc substringFromIndex:location.location], exp];
 }
 
 - (NSString *)description {

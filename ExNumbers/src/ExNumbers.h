@@ -12,6 +12,9 @@
 
 typedef enum {FORMAT_STANDARD, FORMAT_SCIENTIFIC, FORMAT_ENGINEERING} NumberFormat;
 
+// NOTE: MUST BE CALLED BEFORE ANYTHING ELSE
++ (void)initWithDigits:(NSUInteger)digits;
+
 + (id)zero;
 + (id)pi;
 + (id)log2;
