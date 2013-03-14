@@ -73,5 +73,17 @@ typedef enum {FORMAT_STANDARD, FORMAT_SCIENTIFIC, FORMAT_ENGINEERING} NumberForm
 - (BOOL)isGreaterThan:(ExNumbers *)object;
 - (BOOL)isLessThan:(ExNumbers *)object;
 
+// integer-based operations -- result will be an integer
+- (ExNumbers *)setBit:(NSUInteger)bit;
+- (ExNumbers *)clearBit:(NSUInteger)bit;
+- (ExNumbers *)toggleBit:(NSUInteger)bit;
+- (ExNumbers *)andWith:(ExNumbers *)number;
+- (ExNumbers *)orWith:(ExNumbers *)number;
+- (ExNumbers *)xorWith:(ExNumbers *)number;
+- (ExNumbers *)norWith:(ExNumbers *)number;
+- (ExNumbers *)nandWith:(ExNumbers *)number;
+- (ExNumbers *)xnorWith:(ExNumbers *)number;
+- (ExNumbers *)onesComplement;
+- (ExNumbers *)twosComplement;
 
 @end

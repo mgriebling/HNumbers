@@ -276,4 +276,89 @@ static NSInteger libDigits = 0;
     return [ExNumbers numberFromMPReal:anint(abs(self.num))];
 }
 
+- (ExNumbers *)setBit:(NSUInteger)bit {
+    mp_int n = [self convertFrom:self.num];
+    mp_int b = pow(mp_int(2), bit);
+    return [ExNumbers numberFromMPReal:mp_real(n)];
+}
+
+- (NSArray *)makeLogical:(mp_int)n {
+    // convert n into a logical number
+    NSMutableArray *logical = [NSMutableArray array];
+    NSInteger Base = 0x7FFFFFFF;
+    mp_int base = mp_int(Base);
+    while (n > base) {
+        int rem = n % Base; n = n / Base;
+        [logical addObject:@(rem)];
+    }
+    [logical addObject:@(n % Base)];
+    return logical;
+}
+
+- (mp_int)makeInteger:(NSArray *)n {
+    // convert n into a logical number
+    int length = n.count-1;
+    mp_int intValue = mp_int(((NSNumber *)n[length--]).integerValue);
+    NSInteger Base = 0x7FFFFFFF;
+    mp_int base = mp_int(Base);
+    while (length >= 0) {
+        intValue *= Base;
+        intValue += ((NSNumber *)n[length--]).integerValue;
+    }
+    return intValue;
+}
+
+- (NSArray *)intAnd:(NSArray *)n1 andInt:(NSArray *)n2 {
+    return n1;
+}
+
+- (ExNumbers *)clearBit:(NSUInteger)bit{
+    return [ExNumbers numberFromInteger:0];    
+}
+
+- (ExNumbers *)toggleBit:(NSUInteger)bit {
+    return [ExNumbers numberFromInteger:0];    
+}
+
+- (mp_int)convertFrom:(mp_complex)c {
+    mp_real n1r = abs(self.num);
+    return mp_int(n1r);
+}
+
+- (ExNumbers *)andWith:(ExNumbers *)number {
+    NSArray *n1 = [self makeLogical:[self convertFrom:self.num]];
+    NSArray *n2 = [self makeLogical:[self convertFrom:number.num]];
+    NSArray *result = [self intAnd:n1 andInt:n2];
+    return [ExNumbers numberFromMPReal:[self makeInteger:result]];
+}
+
+- (ExNumbers *)orWith:(ExNumbers *)number {
+    return [ExNumbers numberFromInteger:0];    
+}
+
+- (ExNumbers *)xorWith:(ExNumbers *)number {
+    return [ExNumbers numberFromInteger:0];    
+}
+
+- (ExNumbers *)norWith:(ExNumbers *)number {
+    return [ExNumbers numberFromInteger:0];    
+}
+
+- (ExNumbers *)nandWith:(ExNumbers *)number {
+    return [ExNumbers numberFromInteger:0];    
+}
+
+- (ExNumbers *)xnorWith:(ExNumbers *)number {
+    return [ExNumbers numberFromInteger:0];    
+}
+
+- (ExNumbers *)onesComplement {
+    return [ExNumbers numberFromInteger:0];    
+}
+
+- (ExNumbers *)twosComplement {
+    return [ExNumbers numberFromInteger:0];   
+}
+
+
 @end
