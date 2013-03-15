@@ -18,6 +18,9 @@
 
 static NSInteger libDigits = 0;
 
+typedef void (^LogicalOp2)(NSInteger n1, NSInteger n2, NSInteger *res);
+typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
+
 + (void)initWithDigits:(NSUInteger)digits {
     if (libDigits != digits) {
         // need to initialize the base library constants and precision
@@ -308,27 +311,80 @@ static NSInteger libDigits = 0;
     return intValue;
 }
 
-- (NSArray *)intAnd:(NSArray *)n1 andInt:(NSArray *)n2 {
-    return n1;
+- (NSArray *)intOp2:(NSArray *)n1 andInt:(NSArray *)n2 usingOperation:(LogicalOp2)operation {
+    NSInteger l1 = n1.count;
+    NSInteger l2 = n2.count;
+    NSInteger max = MAX(l1, l2);
+    NSMutableArray *result = [NSMutableArray array];
+    for (NSInteger i=0; i<max; i++) {
+        // logically apply the 'operation' to pieces of 'n1' and 'n2'
+        NSInteger p1 = (i < l1) ? ((NSNumber *)n1[i]).integerValue : 0;
+        NSInteger p2 = (i < l2) ? ((NSNumber *)n2[i]).integerValue : 0;
+        NSInteger res;
+        operation(p1, p2, &res);
+        [result addObject:@(res)];
+    }
+    return result;
+}
+
+- (NSArray *)intOp1:(NSArray *)n usingOperation:(LogicalOp1)operation {
+    NSInteger max = n.count;
+    NSMutableArray *result = [NSMutableArray array];
+    for (NSInteger i=0; i<max; i++) {
+        // logically apply the 'operation' to pieces of 'n'
+        NSInteger res;
+        operation(((NSNumber *)n[i]).integerValue, &res);
+        [result addObject:@(res)];
+    }
+    return result;
 }
 
 - (ExNumbers *)clearBit:(NSUInteger)bit{
-    return [ExNumbers numberFromInteger:0];    
+    mp_int xbit = pow(2, bit);
+    return [self andWith:[ExNumbers numberFromMPReal:xbit]];
 }
 
 - (ExNumbers *)toggleBit:(NSUInteger)bit {
     return [ExNumbers numberFromInteger:0];    
 }
 
+- (NSUInteger)numberOfOneBits {
+    NSArray *logical = [self makeLogical:[self convertFrom:self.num]];
+    NSUInteger total = 0;
+    for (NSNumber *number in logical) {
+        NSInteger inumber = number.integerValue;
+        while (inumber != 0) {
+            if (inumber & 1) total++;
+            inumber /= 2;
+        }
+    }
+    return total;
+}
+
+- (NSUInteger)sizeInBits {
+    NSArray *logical = [self makeLogical:[self convertFrom:self.num]];
+    NSUInteger size = (logical.count - 1) * (sizeof(NSInteger) - 1);
+    
+    // count the bits in the highest word separately
+    NSInteger inumber = ((NSNumber *)[logical lastObject]).integerValue;
+    while (inumber != 0) {
+        size++;
+        inumber /= 2;
+    }
+    return size;
+}
+
 - (mp_int)convertFrom:(mp_complex)c {
-    mp_real n1r = abs(self.num);
-    return mp_int(n1r);
+    mp_real n = abs(self.num);
+    return mp_int(n);
 }
 
 - (ExNumbers *)andWith:(ExNumbers *)number {
     NSArray *n1 = [self makeLogical:[self convertFrom:self.num]];
     NSArray *n2 = [self makeLogical:[self convertFrom:number.num]];
-    NSArray *result = [self intAnd:n1 andInt:n2];
+    NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
+        *res = n1 & n2;
+    }];
     return [ExNumbers numberFromMPReal:[self makeInteger:result]];
 }
 

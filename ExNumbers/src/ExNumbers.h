@@ -77,6 +77,9 @@ typedef enum {FORMAT_STANDARD, FORMAT_SCIENTIFIC, FORMAT_ENGINEERING} NumberForm
 - (ExNumbers *)setBit:(NSUInteger)bit;
 - (ExNumbers *)clearBit:(NSUInteger)bit;
 - (ExNumbers *)toggleBit:(NSUInteger)bit;
+- (NSUInteger)numberOfOneBits;
+- (NSUInteger)sizeInBits;
+
 - (ExNumbers *)andWith:(ExNumbers *)number;
 - (ExNumbers *)orWith:(ExNumbers *)number;
 - (ExNumbers *)xorWith:(ExNumbers *)number;
