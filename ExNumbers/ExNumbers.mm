@@ -341,6 +341,8 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 
 - (ExNumbers *)clearBit:(NSUInteger)bit{
     mp_int xbit = pow(2, bit);
+    NSUInteger bits = MAX(bit+1, [self sizeInBits]);
+    
     return [self andWith:[ExNumbers numberFromMPReal:xbit]];
 }
 
