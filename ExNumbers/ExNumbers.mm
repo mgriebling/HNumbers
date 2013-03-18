@@ -269,9 +269,25 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     }
 }
 
-- (NSString *)stringWithBase:(NSUInteger)base andFormat:(NumberFormat)format {
-    // TBD
-    return @"TBD";
+- (NSString *)stringFromDigit:(NSInteger)digit withBase:(NSInteger)base {
+    if (base < 2 || base > 36 || digit >= base) return @"?";
+    if (base <= 10) return [NSString stringWithFormat:@"%d", digit];
+    if (base <= 16) return [NSString stringWithFormat:@"%X", digit];
+    unichar digitCharacter[1] = {static_cast<unichar>(digit - 16 + 0x47)};
+    return [NSString stringWithCharacters:digitCharacter length:1];
+}
+
+- (NSString *)stringWithBase:(NSInteger)base andFormat:(NumberFormat)format {
+    if (base == 10) return [self description];
+    NSString *result = @"";
+    mp_real n = anint(abs(self.num));
+    mp_int inum = n;
+    mp_int izero = 0;
+    while (inum > izero) {
+        int digit = inum % base; inum /= base;
+        result = [NSString stringWithFormat:@"%@%@", [self stringFromDigit:digit withBase:base], result];
+    }
+    return result;
 }
 
 
@@ -341,7 +357,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 
 - (ExNumbers *)clearBit:(NSUInteger)bit{
     mp_int xbit = pow(2, bit);
-    NSUInteger bits = MAX(bit+1, [self sizeInBits]);
+//    NSUInteger bits = MAX(bit+1, [self sizeInBits]);
     
     return [self andWith:[ExNumbers numberFromMPReal:xbit]];
 }
@@ -377,7 +393,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 }
 
 - (mp_int)convertFrom:(mp_complex)c {
-    mp_real n = abs(self.num);
+    mp_real n = abs(c);
     return mp_int(n);
 }
 
@@ -387,6 +403,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = n1 & n2;
     }];
+    mp_int iresult = [self makeInteger:result];
     return [ExNumbers numberFromMPReal:[self makeInteger:result]];
 }
 
