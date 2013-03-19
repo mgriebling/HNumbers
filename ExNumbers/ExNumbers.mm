@@ -248,7 +248,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     return  abs(self.num) < abs(object.num);
 }
 
-#define BASE_NUMBER  (0x7FFFFFFF)
+#define BASE_NUMBER  (2147483648.0)
 
 - (NSString *)stringFromNumber:(mp_real)real {
     NSString *str = [NSString stringWithCString:real.to_string().c_str() encoding:NSASCIIStringEncoding];
@@ -300,13 +300,13 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 - (NSArray *)makeLogical:(mp_int)n {
     // convert n into a logical number
     NSMutableArray *logical = [NSMutableArray array];
-    NSInteger Base = BASE_NUMBER;
-    mp_int base = mp_int(Base);
+    mp_int base = mp_int(BASE_NUMBER);
     while (n > base) {
-        int rem = n % Base; n = n / Base;
-        [logical addObject:@(rem)];
+        mp_int rem = n % base; n = n / base;
+        NSInteger irem = integer(rem);
+        [logical addObject:@(irem)];
     }
-    [logical addObject:@(n % Base)];
+    [logical addObject:@(integer(n % base))];
     return logical;
 }
 
@@ -314,10 +314,9 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     // convert n into a logical number
     int length = n.count-1;
     mp_int intValue = mp_int(((NSNumber *)n[length--]).integerValue);
-    NSInteger Base = BASE_NUMBER;
-    mp_int base = mp_int(Base);
+    mp_int base = mp_int(BASE_NUMBER);
     while (length >= 0) {
-        intValue *= Base;
+        intValue = intValue * base;
         intValue += ((NSNumber *)n[length--]).integerValue;
     }
     return intValue;
