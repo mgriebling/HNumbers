@@ -34,7 +34,7 @@ typedef enum {FORMAT_STANDARD, FORMAT_SCIENTIFIC, FORMAT_ENGINEERING} NumberForm
 - (id)initFromString:(NSString *)real imaginaryString:(NSString *)imaginary;
 
 - (NSString *)description;
-- (NSString *)stringWithBase:(NSUInteger)base andFormat:(NumberFormat)format;
+- (NSString *)stringWithBase:(NSInteger)base andFormat:(NumberFormat)format;
 
 - (ExNumbers *)real;
 - (ExNumbers *)imaginary;
