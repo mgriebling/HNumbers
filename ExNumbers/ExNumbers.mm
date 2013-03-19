@@ -61,6 +61,10 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     return [self initFromMPComplex:mp_complex(real, mp_int(0))];
 }
 
+- (id)initFromMPInt:(mp_int)integer {
+    return [self initFromMPComplex:mp_complex(integer, mp_int(0))];
+}
+
 + (id)numberFromExComplex:(mp_real)real imaginary:(mp_real)imaginary {
     return [[ExNumbers alloc] initFromExComplex:real imaginary:imaginary];
 }
@@ -79,6 +83,10 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 
 + (id)numberFromMPReal:(mp_real)real {
     return [[ExNumbers alloc] initFromMPReal:real];
+}
+
++ (id)numberFromMPInt:(mp_int)integer {
+    return [[ExNumbers alloc] initFromMPInt:integer];
 }
 
 - (id)initFromString:(NSString *)real imaginaryString:(NSString *)imaginary {
@@ -281,10 +289,9 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 
 - (NSString *)stringWithBase:(NSInteger)base andFormat:(NumberFormat)format {
     if (base == 10) return [self description];
-    NSString *result = @"";
-    mp_real n = anint(abs(self.num));
-    mp_int inum = n;
-    mp_int izero = 0;
+    NSString *result = @"0";
+    mp_int inum = self.num.real;
+    mp_int izero = mp_int(0);
     while (inum > izero) {
         int digit = inum % base; inum /= base;
         result = [NSString stringWithFormat:@"%@%@", [self stringFromDigit:digit withBase:base], result];
@@ -356,7 +363,9 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     NSArray *result = [self intOp2:n andInt:b usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = n1 | n2;
     }];
-    return [ExNumbers numberFromMPReal:[self makeInteger:result]];
+    mp_int m = [self makeInteger:result];
+    ExNumbers *xm = [ExNumbers numberFromMPInt:m];
+    return xm;
 }
 
 - (ExNumbers *)clearBit:(NSUInteger)bit{
@@ -365,7 +374,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     NSArray *result = [self intOp2:n andInt:b usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = n1 & ~n2;
     }];
-    return [ExNumbers numberFromMPReal:[self makeInteger:result]];
+    return [ExNumbers numberFromMPInt:[self makeInteger:result]];
 }
 
 - (ExNumbers *)toggleBit:(NSUInteger)bit {
@@ -374,7 +383,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     NSArray *result = [self intOp2:n andInt:b usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = n1 ^ n2;
     }];
-    return [ExNumbers numberFromMPReal:[self makeInteger:result]];
+    return [ExNumbers numberFromMPInt:[self makeInteger:result]];
 }
 
 - (NSUInteger)numberOfOneBits {
@@ -392,7 +401,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 
 - (NSUInteger)sizeInBits {
     NSArray *logical = [self makeLogical:[self convertFrom:self.num]];
-    NSUInteger size = (logical.count - 1) * (sizeof(NSInteger) - 1);
+    NSUInteger size = (logical.count - 1) * (sizeof(NSInteger)*8 - 1);
     
     // count the bits in the highest word separately
     NSInteger inumber = ((NSNumber *)[logical lastObject]).integerValue;
@@ -415,7 +424,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
         *res = n1 & n2;
     }];
     mp_int iresult = [self makeInteger:result];
-    return [ExNumbers numberFromMPReal:[self makeInteger:result]];
+    return [ExNumbers numberFromMPInt:[self makeInteger:result]];
 }
 
 - (ExNumbers *)orWith:(ExNumbers *)number {
@@ -424,7 +433,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = n1 | n2;
     }];
-    return [ExNumbers numberFromMPReal:[self makeInteger:result]];
+    return [ExNumbers numberFromMPInt:[self makeInteger:result]];
 }
 
 - (ExNumbers *)xorWith:(ExNumbers *)number {
