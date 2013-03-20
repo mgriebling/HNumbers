@@ -568,11 +568,11 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 }
 
 - (ExNumbers *)onesComplement {
-    return [ExNumbers numberFromInteger:0];    
+    return [ExNumbers numberFromMPComplex:-self.num-mp_int(1)];
 }
 
 - (ExNumbers *)twosComplement {
-    return [ExNumbers numberFromInteger:0];   
+    return [ExNumbers numberFromMPComplex:-self.num];
 }
 
 
