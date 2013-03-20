@@ -70,6 +70,13 @@ typedef enum {FORMAT_STANDARD, FORMAT_SCIENTIFIC, FORMAT_ENGINEERING} NumberForm
 - (ExNumbers *)random;
 - (ExNumbers *)floatingModulus:(ExNumbers *)modulus;
 
+// special functions in real number domain
+- (ExNumbers *)gamma;
+- (ExNumbers *)erfc;
+- (ExNumbers *)erf;
+- (ExNumbers *)bessel;
+- (ExNumbers *)besselexp;
+
 - (BOOL)isGreaterThan:(ExNumbers *)object;
 - (BOOL)isLessThan:(ExNumbers *)object;
 
@@ -79,6 +86,7 @@ typedef enum {FORMAT_STANDARD, FORMAT_SCIENTIFIC, FORMAT_ENGINEERING} NumberForm
 - (ExNumbers *)toggleBit:(NSUInteger)bit;
 - (NSUInteger)numberOfOneBits;
 - (NSUInteger)sizeInBits;
+- (ExNumbers *)factorial:(NSInteger)n;
 
 - (ExNumbers *)andWith:(ExNumbers *)number;
 - (ExNumbers *)orWith:(ExNumbers *)number;

@@ -232,6 +232,31 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     return [ExNumbers numberFromMPReal:acos(self.num.real)];
 }
 
+- (ExNumbers *)gamma  {
+    // FIX ME
+    return [ExNumbers numberFromMPReal:gamma(self.num.real)];
+}
+
+- (ExNumbers *)erfc  {
+    // FIX ME
+    return [ExNumbers numberFromMPReal:erfc(self.num.real)];
+}
+
+- (ExNumbers *)erf  {
+    // FIX ME
+    return [ExNumbers numberFromMPReal:erf(self.num.real)];
+}
+
+- (ExNumbers *)bessel  {
+    // FIX ME
+    return [ExNumbers numberFromMPReal:bessel(self.num.real)];
+}
+
+- (ExNumbers *)besselexp  {
+    // FIX ME
+    return [ExNumbers numberFromMPReal:besselexp(self.num.real)];
+}
+
 - (ExNumbers *)random  {
     return [ExNumbers numberFromExComplex:mp_rand() imaginary:mp_rand()];
 }
@@ -302,6 +327,63 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 
 - (ExNumbers *)integer {
     return [ExNumbers numberFromMPReal:anint(abs(self.num))];
+}
+
+/* Return the power of the prime number p in the factorization of n! */
+- (int) multiplicity:(int) n andP:(int) p {
+    int q = n, m = 0;
+    if (p > n) return 0;
+    if (p > n/2) return 1;
+    while (q >= p) {
+        q /= p;
+        m += q;
+    }
+    return m;
+}
+
+-(unsigned char*) prime_table:(int) n {
+    int i, j;
+    unsigned char* sieve = (unsigned char*)calloc(n+1, sizeof(unsigned char));
+    sieve[0] = sieve[1] = 1;
+    for (i=2; i*i <= n; i++)
+        if (sieve[i] == 0)
+            for (j=i*i; j <= n; j+=i)
+                sieve[j] = 1;
+    return sieve;
+}
+
+-(mp_int) exponentWithBase:(unsigned int) base power:(unsigned int) power {
+    int bit;
+    mp_int result = mp_int(1);
+    
+    bit=sizeof(power)*CHAR_BIT - 1;
+    while ((power & (1 << bit)) == 0) bit--;
+    for( ; bit>=0; bit--) {
+        result = sqr(result);
+        if ((power & (1 << bit)) != 0) {
+            result *= base;
+        }
+    }
+    return result;
+}
+
+- (mp_int) factorialWith:(NSInteger) n {
+    unsigned char* primes = [self prime_table:n];
+    int p;
+    mp_int result   = mp_int(1);
+    mp_int p_raised = mp_int(0);
+    
+    for (p = 2; p <= n; p++) {
+        if (primes[p] == 1) continue;
+        result = result * [self exponentWithBase:p power:[self multiplicity:n andP:p]];
+    }
+    
+    free(primes);
+    return result;
+}
+
+- (ExNumbers *)factorial:(NSInteger)n {
+    return [ExNumbers numberFromMPInt:[self factorialWith:n]];
 }
 
 - (NSArray *)makeLogical:(mp_int)n {
@@ -437,19 +519,39 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 }
 
 - (ExNumbers *)xorWith:(ExNumbers *)number {
-    return [ExNumbers numberFromInteger:0];    
+    NSArray *n1 = [self makeLogical:[self convertFrom:self.num]];
+    NSArray *n2 = [self makeLogical:[self convertFrom:number.num]];
+    NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
+        *res = n1 ^ n2;
+    }];
+    return [ExNumbers numberFromMPInt:[self makeInteger:result]];
 }
 
 - (ExNumbers *)norWith:(ExNumbers *)number {
-    return [ExNumbers numberFromInteger:0];    
+    NSArray *n1 = [self makeLogical:[self convertFrom:self.num]];
+    NSArray *n2 = [self makeLogical:[self convertFrom:number.num]];
+    NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
+        *res = ~(n1 | n2);
+    }];
+    return [ExNumbers numberFromMPInt:[self makeInteger:result]];
 }
 
 - (ExNumbers *)nandWith:(ExNumbers *)number {
-    return [ExNumbers numberFromInteger:0];    
+    NSArray *n1 = [self makeLogical:[self convertFrom:self.num]];
+    NSArray *n2 = [self makeLogical:[self convertFrom:number.num]];
+    NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
+        *res = ~(n1 & n2);
+    }];
+    return [ExNumbers numberFromMPInt:[self makeInteger:result]];
 }
 
 - (ExNumbers *)xnorWith:(ExNumbers *)number {
-    return [ExNumbers numberFromInteger:0];    
+    NSArray *n1 = [self makeLogical:[self convertFrom:self.num]];
+    NSArray *n2 = [self makeLogical:[self convertFrom:number.num]];
+    NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
+        *res = ~(n1 ^ n2);
+    }];
+    return [ExNumbers numberFromMPInt:[self makeInteger:result]];
 }
 
 - (ExNumbers *)onesComplement {
