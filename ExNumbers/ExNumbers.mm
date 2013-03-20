@@ -382,8 +382,21 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     return result;
 }
 
-- (ExNumbers *)factorial:(NSInteger)n {
-    return [ExNumbers numberFromMPInt:[self factorialWith:n]];
+- (ExNumbers *)factorial {
+    // check if an integer factorial is possible
+    mp_real n = anint(self.num.real);
+    if (abs(self.num.real - n) == 0) {
+        // use integer factorial
+        NSInteger nint = integer(n);
+        if (nint >= 0 && nint < 79) {
+            // accurate to 100 digits
+            return [ExNumbers numberFromMPInt:[self factorialWith:nint]];
+        }
+    }
+    
+    // use the gamma function approximation except for negative integers
+    if (abs(self.num.real - n) != 0 || n >= 0) return [ExNumbers numberFromMPReal:gamma(self.num.real + 1)];
+    return [ExNumbers numberFromInteger:1];
 }
 
 - (NSArray *)makeLogical:(mp_int)n {
