@@ -283,24 +283,50 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 
 #define BASE_NUMBER  (2147483648.0)
 
-- (NSString *)stringFromNumber:(mp_real)real {
+- (NSString *)stringFromNumber:(mp_real)real withFormat:(NumberFormat)format {
+    BOOL isNegative = real < 0;
+    real = abs(real);
     NSString *str = [NSString stringWithCString:real.to_string().c_str() encoding:NSASCIIStringEncoding];
     NSString *trunc = [str substringFromIndex:5];
     NSRange location = [trunc rangeOfString:@" x"];
     NSString *exp = [trunc substringToIndex:location.location];
-    if (exp.integerValue == 0) return [trunc substringFromIndex:location.location+3];
-    else return [NSString stringWithFormat:@"%@×10^%@", [trunc substringFromIndex:location.location+3], exp];
+    NSString *fraction;
+
+    if (format == FORMAT_SCIENTIFIC) {
+        fraction = [NSString stringWithFormat:@"%@×10^%@", [trunc substringFromIndex:location.location+3], exp];
+    } else if (format == FORMAT_ENGINEERING) {
+        NSInteger expValue = exp.integerValue;
+        NSInteger adjust = 3 - expValue % 3;
+        NSString *fraction = [[trunc substringFromIndex:location.location+3] stringByReplacingOccurrencesOfString:@"." withString:@""];
+        expValue += adjust;
+        fraction = [NSString stringWithFormat:@"%@.%@×10^%d", [fraction substringToIndex:expValue], [fraction substringFromIndex:expValue], expValue];
+    } else {
+        NSInteger expValue = exp.integerValue;
+        NSString *fraction = [[trunc substringFromIndex:location.location+3] stringByReplacingOccurrencesOfString:@"." withString:@""];
+        if (expValue < fraction.length) {
+            // use floating decimal point output
+            fraction = [NSString stringWithFormat:@"%@.%@", [fraction substringToIndex:expValue], [fraction substringFromIndex:expValue]];
+        } else {
+            fraction = [NSString stringWithFormat:@"%@×10^%@", [trunc substringFromIndex:location.location+3], exp];            
+        }
+    }
+    if (isNegative) return [@"-" stringByAppendingString:fraction];
+    return fraction;
 }
 
 - (NSString *)description {
+    return [self descriptionWithFormat:FORMAT_STANDARD];
+}
+
+- (NSString *)descriptionWithFormat:(NumberFormat)format {
     if (self.num.imag == 0) {
-        return [NSString stringWithFormat:@"%@", [self stringFromNumber:self.num.real]];
+        return [NSString stringWithFormat:@"%@", [self stringFromNumber:self.num.real withFormat:format]];
     } else if (self.num.real == 0) {
-        return [NSString stringWithFormat:@"%@i", [self stringFromNumber:self.num.imag]];
+        return [NSString stringWithFormat:@"%@i", [self stringFromNumber:self.num.imag withFormat:format]];
     } else {
         NSString *sign = self.num.imag > 0 ? @"+" : @"-";
-        NSString *imag = abs(self.num.imag) == 1 ? @"" : [self stringFromNumber:abs(self.num.imag)];
-        return [NSString stringWithFormat:@"%@ %@ %@i", [self stringFromNumber:self.num.real], sign, imag];
+        NSString *imag = abs(self.num.imag) == 1 ? @"" : [self stringFromNumber:abs(self.num.imag) withFormat:format];
+        return [NSString stringWithFormat:@"%@ %@ %@i", [self stringFromNumber:self.num.real withFormat:format], sign, imag];
     }
 }
 
@@ -313,15 +339,18 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 }
 
 - (NSString *)stringWithBase:(NSInteger)base andFormat:(NumberFormat)format {
-    if (base == 10) return [self description];
-    NSString *result = @"0";
-    mp_int inum = self.num.real;
-    mp_int izero = mp_int(0);
-    while (inum > izero) {
-        int digit = inum % base; inum /= base;
-        result = [NSString stringWithFormat:@"%@%@", [self stringFromDigit:digit withBase:base], result];
+    if (base == 10) {
+        return [self descriptionWithFormat:format];
+    } else {
+        NSString *result = @"0";
+        mp_int inum = self.num.real;
+        mp_int izero = mp_int(0);
+        while (inum > izero) {
+            int digit = inum % base; inum /= base;
+            result = [NSString stringWithFormat:@"%@%@", [self stringFromDigit:digit withBase:base], result];
+        }
+        return result;
     }
-    return result;
 }
 
 
