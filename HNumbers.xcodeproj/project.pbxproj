@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2FD65C8716EF46DE003F8FC1 /* ExNumbers.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2FD65C8616EF46DE003F8FC1 /* ExNumbers.mm */; };
+		2FD65C8716EF46DE003F8FC1 /* HNumber.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2FD65C8616EF46DE003F8FC1 /* HNumber.mm */; };
 		47B35FFC16ECE052007ECCC9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47B35FFB16ECE052007ECCC9 /* Foundation.framework */; };
 		47B360AB16ECE1CD007ECCC9 /* add.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47B3605916ECE1CD007ECCC9 /* add.cpp */; };
 		47B360AC16ECE1CD007ECCC9 /* agmx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47B3605A16ECE1CD007ECCC9 /* agmx.cpp */; };
@@ -101,11 +101,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2FD65C8616EF46DE003F8FC1 /* ExNumbers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ExNumbers.mm; sourceTree = "<group>"; };
-		2FD65C8816EF46F0003F8FC1 /* ExNumbers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExNumbers.h; path = src/ExNumbers.h; sourceTree = "<group>"; };
-		47B35FF816ECE052007ECCC9 /* libExNumbers.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libExNumbers.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FD65C8616EF46DE003F8FC1 /* HNumber.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HNumber.mm; sourceTree = "<group>"; };
+		2FD65C8816EF46F0003F8FC1 /* HNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HNumber.h; path = src/HNumber.h; sourceTree = "<group>"; };
+		47B35FF816ECE052007ECCC9 /* libHNumbers.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHNumbers.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		47B35FFB16ECE052007ECCC9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		47B35FFF16ECE052007ECCC9 /* ExNumbers-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ExNumbers-Prefix.pch"; sourceTree = "<group>"; };
+		47B35FFF16ECE052007ECCC9 /* HNumbers-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "HNumbers-Prefix.pch"; sourceTree = "<group>"; };
 		47B3605916ECE1CD007ECCC9 /* add.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = add.cpp; sourceTree = "<group>"; };
 		47B3605A16ECE1CD007ECCC9 /* agmx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = agmx.cpp; sourceTree = "<group>"; };
 		47B3605B16ECE1CD007ECCC9 /* ang.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ang.cpp; sourceTree = "<group>"; };
@@ -225,7 +225,7 @@
 		47B35FF916ECE052007ECCC9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				47B35FF816ECE052007ECCC9 /* libExNumbers.a */,
+				47B35FF816ECE052007ECCC9 /* libHNumbers.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -243,8 +243,8 @@
 			children = (
 				47B360FA16ECE1E5007ECCC9 /* include */,
 				47B3600916ECE1CD007ECCC9 /* src */,
-				2FD65C8616EF46DE003F8FC1 /* ExNumbers.mm */,
-				2FD65C8816EF46F0003F8FC1 /* ExNumbers.h */,
+				2FD65C8616EF46DE003F8FC1 /* HNumber.mm */,
+				2FD65C8816EF46F0003F8FC1 /* HNumber.h */,
 				47B35FFE16ECE052007ECCC9 /* Supporting Files */,
 			);
 			path = ExNumbers;
@@ -253,7 +253,7 @@
 		47B35FFE16ECE052007ECCC9 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				47B35FFF16ECE052007ECCC9 /* ExNumbers-Prefix.pch */,
+				47B35FFF16ECE052007ECCC9 /* HNumbers-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -376,9 +376,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		47B35FF716ECE052007ECCC9 /* ExNumbers */ = {
+		47B35FF716ECE052007ECCC9 /* HNumbers */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 47B3600616ECE052007ECCC9 /* Build configuration list for PBXNativeTarget "ExNumbers" */;
+			buildConfigurationList = 47B3600616ECE052007ECCC9 /* Build configuration list for PBXNativeTarget "HNumbers" */;
 			buildPhases = (
 				47B35FF416ECE052007ECCC9 /* Sources */,
 				47B35FF516ECE052007ECCC9 /* Frameworks */,
@@ -388,9 +388,9 @@
 			);
 			dependencies = (
 			);
-			name = ExNumbers;
+			name = HNumbers;
 			productName = ExNumbers;
-			productReference = 47B35FF816ECE052007ECCC9 /* libExNumbers.a */;
+			productReference = 47B35FF816ECE052007ECCC9 /* libHNumbers.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -402,7 +402,7 @@
 				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "Computer Inspirations";
 			};
-			buildConfigurationList = 47B35FF316ECE052007ECCC9 /* Build configuration list for PBXProject "ExNumbers" */;
+			buildConfigurationList = 47B35FF316ECE052007ECCC9 /* Build configuration list for PBXProject "HNumbers" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -414,7 +414,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				47B35FF716ECE052007ECCC9 /* ExNumbers */,
+				47B35FF716ECE052007ECCC9 /* HNumbers */,
 			);
 		};
 /* End PBXProject section */
@@ -501,7 +501,7 @@
 				47B360F716ECE1CD007ECCC9 /* sub.cpp in Sources */,
 				47B360F816ECE1CD007ECCC9 /* to_digits.cpp in Sources */,
 				47B360F916ECE1CD007ECCC9 /* write.cpp in Sources */,
-				2FD65C8716EF46DE003F8FC1 /* ExNumbers.mm in Sources */,
+				2FD65C8716EF46DE003F8FC1 /* HNumber.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -570,9 +570,9 @@
 			buildSettings = {
 				DSTROOT = /tmp/ExNumbers.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "ExNumbers/ExNumbers-Prefix.pch";
+				GCC_PREFIX_HEADER = "ExNumbers/HNumbers-Prefix.pch";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = HNumbers;
 				SKIP_INSTALL = NO;
 			};
 			name = Debug;
@@ -582,9 +582,9 @@
 			buildSettings = {
 				DSTROOT = /tmp/ExNumbers.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "ExNumbers/ExNumbers-Prefix.pch";
+				GCC_PREFIX_HEADER = "ExNumbers/HNumbers-Prefix.pch";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = HNumbers;
 				SKIP_INSTALL = NO;
 			};
 			name = Release;
@@ -592,7 +592,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		47B35FF316ECE052007ECCC9 /* Build configuration list for PBXProject "ExNumbers" */ = {
+		47B35FF316ECE052007ECCC9 /* Build configuration list for PBXProject "HNumbers" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				47B3600416ECE052007ECCC9 /* Debug */,
@@ -601,7 +601,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		47B3600616ECE052007ECCC9 /* Build configuration list for PBXNativeTarget "ExNumbers" */ = {
+		47B3600616ECE052007ECCC9 /* Build configuration list for PBXNativeTarget "HNumbers" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				47B3600716ECE052007ECCC9 /* Debug */,
