@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		2FD65C8716EF46DE003F8FC1 /* HNumber.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2FD65C8616EF46DE003F8FC1 /* HNumber.mm */; };
+		4795E79016FF528A00722E2D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4795E78F16FF528A00722E2D /* Cocoa.framework */; };
+		4795E79A16FF528A00722E2D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4795E79816FF528A00722E2D /* InfoPlist.strings */; };
+		4795E79E16FF528A00722E2D /* HMNumbers.m in Sources */ = {isa = PBXBuildFile; fileRef = 4795E79D16FF528A00722E2D /* HMNumbers.m */; };
 		47B35FFC16ECE052007ECCC9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47B35FFB16ECE052007ECCC9 /* Foundation.framework */; };
 		47B360AB16ECE1CD007ECCC9 /* add.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47B3605916ECE1CD007ECCC9 /* add.cpp */; };
 		47B360AC16ECE1CD007ECCC9 /* agmx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47B3605A16ECE1CD007ECCC9 /* agmx.cpp */; };
@@ -103,6 +106,16 @@
 /* Begin PBXFileReference section */
 		2FD65C8616EF46DE003F8FC1 /* HNumber.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HNumber.mm; sourceTree = "<group>"; };
 		2FD65C8816EF46F0003F8FC1 /* HNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HNumber.h; path = src/HNumber.h; sourceTree = "<group>"; };
+		4795E78E16FF528A00722E2D /* HMNumbers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = HMNumbers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4795E78F16FF528A00722E2D /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		4795E79216FF528A00722E2D /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		4795E79316FF528A00722E2D /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		4795E79416FF528A00722E2D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		4795E79716FF528A00722E2D /* HMNumbers-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "HMNumbers-Info.plist"; sourceTree = "<group>"; };
+		4795E79916FF528A00722E2D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		4795E79B16FF528A00722E2D /* HMNumbers-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "HMNumbers-Prefix.pch"; sourceTree = "<group>"; };
+		4795E79C16FF528A00722E2D /* HMNumbers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HMNumbers.h; sourceTree = "<group>"; };
+		4795E79D16FF528A00722E2D /* HMNumbers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HMNumbers.m; sourceTree = "<group>"; };
 		47B35FF816ECE052007ECCC9 /* libHNumbers.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHNumbers.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		47B35FFB16ECE052007ECCC9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		47B35FFF16ECE052007ECCC9 /* HNumbers-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "HNumbers-Prefix.pch"; sourceTree = "<group>"; };
@@ -202,6 +215,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4795E78A16FF528A00722E2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4795E79016FF528A00722E2D /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		47B35FF516ECE052007ECCC9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -213,10 +234,41 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4795E79116FF528A00722E2D /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4795E79216FF528A00722E2D /* AppKit.framework */,
+				4795E79316FF528A00722E2D /* CoreData.framework */,
+				4795E79416FF528A00722E2D /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		4795E79516FF528A00722E2D /* HMNumbers */ = {
+			isa = PBXGroup;
+			children = (
+				4795E79C16FF528A00722E2D /* HMNumbers.h */,
+				4795E79D16FF528A00722E2D /* HMNumbers.m */,
+				4795E79616FF528A00722E2D /* Supporting Files */,
+			);
+			path = HMNumbers;
+			sourceTree = "<group>";
+		};
+		4795E79616FF528A00722E2D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				4795E79716FF528A00722E2D /* HMNumbers-Info.plist */,
+				4795E79816FF528A00722E2D /* InfoPlist.strings */,
+				4795E79B16FF528A00722E2D /* HMNumbers-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		47B35FEF16ECE052007ECCC9 = {
 			isa = PBXGroup;
 			children = (
 				47B35FFD16ECE052007ECCC9 /* ExNumbers */,
+				4795E79516FF528A00722E2D /* HMNumbers */,
 				47B35FFA16ECE052007ECCC9 /* Frameworks */,
 				47B35FF916ECE052007ECCC9 /* Products */,
 			);
@@ -226,6 +278,7 @@
 			isa = PBXGroup;
 			children = (
 				47B35FF816ECE052007ECCC9 /* libHNumbers.a */,
+				4795E78E16FF528A00722E2D /* HMNumbers.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -234,6 +287,8 @@
 			isa = PBXGroup;
 			children = (
 				47B35FFB16ECE052007ECCC9 /* Foundation.framework */,
+				4795E78F16FF528A00722E2D /* Cocoa.framework */,
+				4795E79116FF528A00722E2D /* Other Frameworks */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -375,7 +430,35 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		4795E78B16FF528A00722E2D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
+		4795E78D16FF528A00722E2D /* HMNumbers */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4795E7A116FF528A00722E2D /* Build configuration list for PBXNativeTarget "HMNumbers" */;
+			buildPhases = (
+				4795E78916FF528A00722E2D /* Sources */,
+				4795E78A16FF528A00722E2D /* Frameworks */,
+				4795E78B16FF528A00722E2D /* Headers */,
+				4795E78C16FF528A00722E2D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HMNumbers;
+			productName = HMNumbers;
+			productReference = 4795E78E16FF528A00722E2D /* HMNumbers.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		47B35FF716ECE052007ECCC9 /* HNumbers */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 47B3600616ECE052007ECCC9 /* Build configuration list for PBXNativeTarget "HNumbers" */;
@@ -415,11 +498,31 @@
 			projectRoot = "";
 			targets = (
 				47B35FF716ECE052007ECCC9 /* HNumbers */,
+				4795E78D16FF528A00722E2D /* HMNumbers */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		4795E78C16FF528A00722E2D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4795E79A16FF528A00722E2D /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		4795E78916FF528A00722E2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4795E79E16FF528A00722E2D /* HMNumbers.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		47B35FF416ECE052007ECCC9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -507,7 +610,67 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXVariantGroup section */
+		4795E79816FF528A00722E2D /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4795E79916FF528A00722E2D /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
+		4795E79F16FF528A00722E2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SYSTEM_APPS_DIR)/Xcode.app/Contents/Developer/Library/Frameworks\"",
+				);
+				FRAMEWORK_VERSION = A;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "HMNumbers/HMNumbers-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				INFOPLIST_FILE = "HMNumbers/HMNumbers-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
+		};
+		4795E7A016FF528A00722E2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SYSTEM_APPS_DIR)/Xcode.app/Contents/Developer/Library/Frameworks\"",
+				);
+				FRAMEWORK_VERSION = A;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "HMNumbers/HMNumbers-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				INFOPLIST_FILE = "HMNumbers/HMNumbers-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Release;
+		};
 		47B3600416ECE052007ECCC9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -592,6 +755,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4795E7A116FF528A00722E2D /* Build configuration list for PBXNativeTarget "HMNumbers" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4795E79F16FF528A00722E2D /* Debug */,
+				4795E7A016FF528A00722E2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		47B35FF316ECE052007ECCC9 /* Build configuration list for PBXProject "HNumbers" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -222,7 +222,7 @@ void mp_real::mpoutx_help(const mp_real& a, char *b, int n, int prec_words)
     // after the first digit.
     // We need to decide from the exponent how many leading zeroes
     // to put down.
-    int leading_zeros = n - exponent-1;
+    int leading_zeros = (int)(n - exponent-1);
     for(i=0;i<leading_zeros;i++) b[i] = '0';
     //get first digit.
     b[i] = temp_string[j-1];

@@ -221,7 +221,7 @@ std::basic_ostream<Ch, Tr>& operator<<(std::basic_ostream<Ch, Tr>& s, const mp_r
   bool uppercase =  (s.flags() & std::ios_base::uppercase) != 0;
   std::ios_base::fmtflags fmt = s.flags();
 
-  a.write(s, s.precision(), s.width(), 0, fmt, 0, showpos, uppercase, s.fill());
+  a.write(s, (int)s.precision(), (int)s.width(), 0, fmt, 0, showpos, uppercase, s.fill());
   return s;
 }
 

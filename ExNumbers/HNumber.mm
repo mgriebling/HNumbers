@@ -16,254 +16,503 @@
 
 @implementation HNumber
 
-static NSInteger libDigits = 0;
+static const NSInteger MAXLENGTH = 200;
+static NSUInteger displayLength;
+static NSUInteger decimals;
+static NSInteger computeLength;
+static NumberFormat mode;
+static NSString *decPoint;
+static NSString *groupChar;
+static HNumber *zeroConst;
+static HNumber *oneConst;
+static HNumber *piConst;
+static HNumber *iConst;
+static HNumber *expConst;
+
+#define NSInteger int
 
 typedef void (^LogicalOp2)(NSInteger n1, NSInteger n2, NSInteger *res);
 typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 
-+ (void)initWithDigits:(NSUInteger)digits {
-    if (libDigits != digits) {
-        // need to initialize the base library constants and precision
-        mp::mp_init(digits);
-        libDigits = digits;
++ (void)initialize {
+    if (self == [HNumber class]) {
+        // initialize the mp_math libary
+        mp::mp_init(MAXLENGTH+5);
+        
+        // predefine common constant
+        zeroConst = [HNumber numberFromInteger:0];
+		oneConst = [HNumber numberWithDouble:1];
+		piConst = [HNumber numberWithMPReal:mp_real::_pi imaginary:mp_real(0.0)];
+		iConst = [HNumber numberWithDouble:0 imaginary:1];
+		expConst = [HNumber numberWithMPReal:exp(mp_real(1.0)) imaginary:mp_real(0.0)];
+		displayLength = 25;
+		decimals = 0;
+		mode = FORMAT_STANDARD;
+		computeLength = MAXLENGTH;
+		NSDictionary *locale = [NSLocale currentLocale];
+		decPoint = [locale objectForKey:NSLocaleDecimalSeparator];
+		groupChar = [locale objectForKey:NSLocaleGroupingSeparator];
     }
+}
+
++ (void)finalize
+{
+	// deallocate the mp math library
+	mp::mp_finalize();
+	[super finalize];
+}
+
++ (NSInteger)displayLength
+{
+	return displayLength;
+}
+
++ (NSInteger)decimalPoints
+{
+	return decimals;
+}
+
++ (NSString *)decimalPoint
+{
+	return decPoint;
+}
+
++ (NSString *)groupingSeparator
+{
+	return groupChar;
+}
+
++ (void) setDisplayLength:(NSInteger)len
+{
+	if (len < MAXLENGTH && len > 15)
+		displayLength = len;
+}
+
++ (void) setDecimalPoints:(NSInteger)dec
+{
+	if (dec < displayLength) decimals = dec;
+}
+
++ (void) setDecimalPoint:(NSString*)dp
+{
+	decPoint = dp;
+}
+
++ (void) setGroupingSeparator:(NSString*)groupSep
+{
+	groupChar = groupSep;
+}
+
++ (void) setFormat : (NumberFormat)format 
+{
+	mode = format;
+}
+
++ (NumberFormat)format {
+    return mode;
 }
 
 // default initializer
 
-- (id)initFromMPComplex:(mp_complex)complex {
-    self = [super init];
-    if (self) _num = complex;
-    return self;
+- init {
+	return [self initWithDouble:0];
 }
 
-- (id)initFromHNumber:(HNumber *)exNumber {
-    return [self initFromMPComplex:exNumber.num];
+// Focal point for all init routines
+- (id)initWithMPReal:(const mp_real &)real imaginary:(const mp_real &)complex
+{
+	if (self = [super init]) {
+		_num.real.reallocate(mp::prec_words);
+		_num.imag.reallocate(mp::prec_words);
+		_num.real = real;
+		_num.imag = complex;
+	}
+	return self;
 }
 
-- (id)initFromInteger:(NSInteger)integer {
-    return [self initFromMPComplex:mp_complex(mp_int(integer), mp_int(0))];
+- (id)initWithMPComplex:(mp_complex)complex {
+    return [self initWithMPReal:complex.real imaginary:complex.imag];
 }
 
-- (id)initFromDouble:(double)number {
-    return [self initFromComplex:number imaginary:0];
+- (id)initWithNumber:(HNumber *)number {
+    return [self initWithMPReal:number.num.real imaginary:number.num.imag];
 }
 
-- (id)initFromComplex:(double)real imaginary:(double)imaginary {
-    return [self initFromMPComplex:mp_complex(mp_real(real), mp_real(imaginary))];
+- (id)initWithInteger:(unsigned long long)integer exponent:(NSInteger)exponent isNegative:(BOOL)isNegative {
+	double number = (integer >> 32);
+	double number2 = (integer % 0x100000000ull);
+	double shift = 0x100000000ull;
+	mp_real real = number2;
+	
+	real += mp_real(number) * shift;
+	real *= pow((mp_real)mp_real(10.0), (int)exponent);
+	if (isNegative) real *= -1;
+	return [self initWithMPReal:real];
 }
 
-- (id)initFromHComplex:(mp_real)real imaginary:(mp_real)imaginary {
-    return [self initFromMPComplex:mp_complex(real, imaginary)];
+- (id)initWithInteger:(NSInteger)integer {
+    return [self initWithInteger:abs(integer) exponent:0 isNegative:integer < 0];    
 }
 
-- (id)initFromMPReal:(mp_real)real {
-    return [self initFromMPComplex:mp_complex(real, mp_int(0))];
+- (id)initWithDouble:(double)number {
+    return [self initWithDouble:number imaginary:0];
 }
 
-- (id)initFromMPInt:(mp_int)integer {
-    return [self initFromMPComplex:mp_complex(integer, mp_int(0))];
+- (id)initWithDouble:(double)real imaginary:(double)imaginary {
+    return [self initWithMPReal:mp_real(real) imaginary:mp_real(imaginary)];
 }
 
-+ (id)numberFromHComplex:(mp_real)real imaginary:(mp_real)imaginary {
-    return [[HNumber alloc] initFromHComplex:real imaginary:imaginary];
+- (id)initWithMPReal:(mp_real)real {
+    return [self initWithMPReal:real imaginary:mp_int(0)];
 }
 
-+ (id)numberFromComplex:(double)real imaginary:(double)imaginary {
-    return [[HNumber alloc] initFromComplex:real imaginary:imaginary];
+- (id)initWithMPInt:(mp_int)integer {
+    return [self initWithMPReal:integer];
 }
 
-+ (id)numberFromMPComplex:(mp_complex)complex {
-    return [[HNumber alloc] initFromMPComplex:complex];
++ (id)numberWithInteger:(unsigned long long)integer exponent:(NSInteger)exponent isNegative:(BOOL)isNegative {
+    return [[HNumber alloc] initWithInteger:integer exponent:exponent isNegative:isNegative];
 }
 
-+ (id)numberFromHNumber:(HNumber *)number {
-    return [[HNumber alloc] initFromHNumber:number];
++ (id)numberWithDouble:(double)number {
+    return [[HNumber alloc] initWithDouble:number];
 }
 
-+ (id)numberFromMPReal:(mp_real)real {
-    return [[HNumber alloc] initFromMPReal:real];
++ (id)numberWithString:(NSString *)string {
+    return [[HNumber alloc] initWithString:string];
 }
 
-+ (id)numberFromMPInt:(mp_int)integer {
-    return [[HNumber alloc] initFromMPInt:integer];
++ (id)numberWithString:(NSString *)string locale:(NSDictionary *)locale {
+    return [[HNumber alloc] initWithString:string locale:locale];
 }
 
-- (id)initFromString:(NSString *)real imaginaryString:(NSString *)imaginary {
-    mp_real realNum = mp_real([real cStringUsingEncoding:NSASCIIStringEncoding]);
-    mp_real imagNum = mp_real([imaginary cStringUsingEncoding:NSASCIIStringEncoding]);
-    return [self initFromMPComplex:mp_complex(realNum, imagNum)];
++ (id)numberWithString:(NSString *)string usingBase:(short)base {
+    return [[HNumber alloc] initWithString:string usingBase:base];
+}
+
++ (id)numberWithMPReal:(mp_real)real imaginary:(mp_real)imaginary {
+    return [[HNumber alloc] initWithMPReal:real imaginary:imaginary];
+}
+
++ (id)numberWithDouble:(double)real imaginary:(double)imaginary {
+    return [[HNumber alloc] initWithDouble:real imaginary:imaginary];
+}
+
++ (id)numberWithMPComplex:(mp_complex)complex {
+    return [[HNumber alloc] initWithMPComplex:complex];
+}
+
++ (id)numberWithNumber:(HNumber *)number {
+    return [[HNumber alloc] initWithNumber:number];
+}
+
++ (id)numberWithMPReal:(mp_real)real {
+    return [[HNumber alloc] initWithMPReal:real];
+}
+
++ (id)numberWithMPInt:(mp_int)integer {
+    return [[HNumber alloc] initWithMPInt:integer];
+}
+
+- (id)initWithString:(NSString *)string {
+    mp_real realNum = mp_real([string cStringUsingEncoding:NSASCIIStringEncoding]);
+    return [self initWithMPReal:realNum];
+}
+
+- (id)initWithString:(NSString *)string locale:(NSDictionary *)locale {
+    return [self initWithString:string];    // fix to use locale
+}
+
+- (id)initWithString:(NSString *)string usingBase:(short)base {
+    return [self initWithString:string];    // fix to use base
 }
 
 + (id)zero {
-    return [HNumber numberFromInteger:0];
+    return zeroConst;
 }
 
 + (id)pi {
-    return [HNumber numberFromMPReal:mp_real::_pi];
+    return piConst;
+}
+
++ (id)one {
+    return oneConst;
+}
+
++ (id)i {
+    return iConst;
+}
+
++ (id)exp {
+    return expConst;
 }
 
 + (id)log2 {
-    return  [HNumber numberFromMPReal:mp_real::_log2];
+    return  [HNumber numberWithMPReal:mp_real::_log2];
 }
 
 + (id)log10 {
-    return  [HNumber numberFromMPReal:mp_real::_log10];
+    return  [HNumber numberWithMPReal:mp_real::_log10];
 }
 
 + (id)eps {
-    return  [HNumber numberFromMPReal:mp_real::_eps];
+    return  [HNumber numberWithMPReal:mp_real::_eps];
 }
 
-- (HNumber *)real {
-    return [HNumber numberFromMPReal:self.num.real];
+- (HNumber *)realPart {
+    return [HNumber numberWithMPReal:self.num.real];
 }
 
-- (HNumber *)imaginary {
-    return [HNumber numberFromMPReal:self.num.imag];
+- (HNumber *)imaginaryPart {
+    return [HNumber numberWithMPReal:self.num.imag];
+}
+
+- (double)doubleValue {
+    return dble(abs(self.num));
+}
+
+- (HNumber *)conjugate {
+    return [HNumber numberWithMPReal:self.num.real imaginary:-self.num.imag];
 }
 
 + (id)numberFromInteger:(NSInteger)integer {
-    return [[HNumber alloc] initFromInteger:integer];
+    return [[HNumber alloc] initWithInteger:integer];
 }
 
 + (id)numberFromDouble:(double)number {
-    return [[HNumber alloc] initFromDouble:number];
+    return [[HNumber alloc] initWithDouble:number];
 }
 
-+ (id)numberFromString:(NSString *)real imaginaryString:(NSString *)imaginary {
-    return [[HNumber alloc] initFromString:real imaginaryString:imaginary];
++ (id)numberFromString:(NSString *)string {
+    return [[HNumber alloc] initWithString:string];
 }
 
 - (HNumber *)add:(HNumber *)complex {
-    return [HNumber numberFromMPComplex:self.num + complex.num];
+    return [HNumber numberWithMPComplex:self.num + complex.num];
 }
 
 - (HNumber *)subtract:(HNumber *)complex {
-    return [HNumber numberFromMPComplex:self.num - complex.num];
+    return [HNumber numberWithMPComplex:self.num - complex.num];
 }
 
-- (HNumber *)multiply:(HNumber *)complex {
-    return [HNumber numberFromMPComplex:self.num * complex.num];
+- (HNumber *)multiplyBy:(HNumber *)complex {
+    return [HNumber numberWithMPComplex:self.num * complex.num];
 }
 
-- (HNumber *)divide:(HNumber *)complex {
-    return [HNumber numberFromMPComplex:self.num / complex.num];
+- (HNumber *)divideBy:(HNumber *)complex {
+    return [HNumber numberWithMPComplex:self.num / complex.num];
 }
 
 - (HNumber *)exponential {
-    return [HNumber numberFromMPComplex:exp(self.num)];
+    return [HNumber numberWithMPComplex:exp(self.num)];
 }
 
 - (HNumber *)naturalLogarithm {
-    return [HNumber numberFromMPComplex:log(self.num)];
+    return [HNumber numberWithMPComplex:log(self.num)];
 }
 
 - (HNumber *)base10Logarithm {
-    return [HNumber numberFromMPComplex:log(self.num)/mp_real::_log10];
+    return [HNumber numberWithMPComplex:log(self.num)/mp_real::_log10];
+}
+
+- (HNumber *)base2Logarithm {
+    return [HNumber numberWithMPComplex:log(self.num)/mp_real::_log2];
 }
 
 - (HNumber *)sine {
-    return [HNumber numberFromMPComplex:sin(self.num)];
+    return [HNumber numberWithMPComplex:sin(self.num)];
 }
 
 - (HNumber *)cosine {
-    return [HNumber numberFromMPComplex:cos(self.num)];
-}
-
-- (HNumber *)squared {
-    return [HNumber numberFromMPComplex:sqr(self.num)];
-}
-
-- (HNumber *)squareRoot {
-    return [HNumber numberFromMPComplex:sqrt(self.num)];
-}
-
-- (HNumber *)absolute {
-    return [HNumber numberFromMPReal:abs(self.num)];
-}
-
-- (HNumber *)argument {
-    return [HNumber numberFromMPReal:arg(self.num)];
-}
-
-- (HNumber *)powerToExponent:(HNumber *)exponent {
-    return [HNumber numberFromMPComplex:exp(self.num)];
+    return [HNumber numberWithMPComplex:cos(self.num)];
 }
 
 - (HNumber *)tangent {
     mp_complex_temp sine = sin(self.num);
     mp_complex_temp cosine = cos(self.num);
-    return [HNumber numberFromMPComplex:sine/cosine];
+    return [HNumber numberWithMPComplex:sine/cosine];
+}
+
+- (HNumber *)squared {
+    return [HNumber numberWithMPComplex:sqr(self.num)];
+}
+
+- (HNumber *)squareRoot {
+    return [HNumber numberWithMPComplex:sqrt(self.num)];
+}
+
+- (HNumber *)cubed
+{
+	return [HNumber numberWithMPComplex:self.num*sqr(self.num)];
+}
+
+- (HNumber *)cubeRoot
+{
+	return [HNumber numberWithNumber:[self anyRoot:3]];
+}
+
+- (HNumber *)anyRoot:(short) root
+{
+	mp_real anyRoot = mp_real(1)/mp_real(root);
+	return [HNumber numberWithMPComplex:pow(self.num, anyRoot)];
+}
+
+- (HNumber *)signOfRealPart
+{
+	if (self.num.real < 0)
+		return [[HNumber zero] subtract:[HNumber one]];
+	else
+		return [HNumber one];
+}
+
+- (HNumber *)minimumOfRealParts:(HNumber *)number
+{
+	if (self.num.real < number.num.real)
+		return [HNumber numberWithMPReal:self.num.real];
+	else
+		return [HNumber numberWithMPReal:number.num.real];
+}
+
+- (HNumber *)maximumOfRealParts:(HNumber *)number
+{
+	if (self.num.real > number.num.real)
+		return [HNumber numberWithMPReal:self.num.real];
+	else
+		return [HNumber numberWithMPReal:number.num.real];
+}
+
+- (HNumber *)multiplyByPowerOf10:(NSUInteger)power
+{
+	return [HNumber numberWithMPComplex:self.num * pow(10.0, power)];
+}
+
+- (HNumber *)raiseToIntegerPower:(NSInteger)power
+{
+	return [HNumber numberWithMPComplex:pow(self.num, power)];
+}
+
+- (HNumber *)raiseToDoublePower:(double)power
+{
+	return [HNumber numberWithMPComplex:pow(self.num, power)];
+}
+
+- (HNumber *)raiseToPower:(HNumber *)power
+{
+	return [HNumber numberWithMPComplex:pow(self.num, power.num)];
+}
+
+- (HNumber *)absoluteValue {
+    return [HNumber numberWithMPReal:abs(self.num)];
+}
+
+- (HNumber *)round {
+	return [HNumber numberWithMPReal:aint(self.num.real) imaginary:aint(self.num.imag)];
+}
+
+- (HNumber *)argument {
+    return [HNumber numberWithMPReal:arg(self.num)];
+}
+
+- (HNumber *)powerToExponent:(HNumber *)exponent {
+    return [HNumber numberWithMPComplex:exp(self.num)];
 }
 
 - (HNumber *)hyperbolicSine {
-    // FIX ME
-    return [HNumber numberFromMPReal:sinh(self.num.real)];
+	// asin(z) = -i*ln(iz+sqrt(1 - z^2))
+	mp_complex i = mp_complex(0, 1);
+	mp_complex result = -i * log(i*self.num + sqrt(mp_real(1) - self.num*self.num));
+	return [HNumber numberWithMPComplex:result];
 }
 
 - (HNumber *)hyperbolicCosine {
-    // FIX ME
-    return [HNumber numberFromMPReal:cosh(self.num.real)];
+	// acos(z) = -i*ln(z+sqrt(z^2 - 1))
+	mp_complex i = mp_complex(0, 1);
+	mp_complex result = -i * log(self.num + sqrt(self.num*self.num - mp_real(1)));
+	return [HNumber numberWithMPComplex:result];
 }
 
 - (HNumber *)hyperbolicTangent {
-    // FIX ME
-    return [HNumber numberFromMPReal:tanh(self.num.real)];
+	// tanh(z) = sinh(z)/cosh(z)
+	HNumber * sinhz = [self hyperbolicSine];
+	HNumber * coshz = [self hyperbolicCosine];
+	return [sinhz divideBy:coshz];
 }
 
-- (HNumber *)arcTangent {
-    // FIX ME
-    return [HNumber numberFromMPReal:atan(self.num.real)];
+- (HNumber *)inverseSine  {
+	// asin(z) = -i*ln(iz+sqrt(1 - z^2))
+	mp_complex i = mp_complex(0, 1);
+	mp_complex result = -i * log(i*self.num + sqrt(mp_real(1) - self.num*self.num));
+	return [HNumber numberWithMPComplex:result];
 }
 
-- (HNumber *)arcTangentWithY:(HNumber *)y  {
-    // FIX ME
-    return [HNumber numberFromMPReal:atan2(y.num.real, self.num.real)];
+- (HNumber *)inverseCosine  {
+	// acos(z) = -i*ln(z+sqrt(z^2 - 1))
+	mp_complex i = mp_complex(0, 1);
+	mp_complex result = -i * log(self.num + sqrt(self.num*self.num - mp_real(1)));
+	return [HNumber numberWithMPComplex:result];
 }
 
-- (HNumber *)arcSine  {
-    // FIX ME
-    return [HNumber numberFromMPReal:asin(self.num.real)];
+- (HNumber *)inverseTangent {
+	// atan(z) = 1/2*ln((i+z)/(i-z))
+	mp_complex i = mp_complex(0, 1);
+	mp_complex result = mp_real(0.5) * log((i+self.num)/(i-self.num));
+	return [HNumber numberWithMPComplex:result];
 }
 
-- (HNumber *)arcCosine  {
-    // FIX ME
-    return [HNumber numberFromMPReal:acos(self.num.real)];
+- (HNumber *)inverseHyperbolicSine
+{
+	// asinh(z) = ln(z + sqrt(z^2 + 1))
+	mp_complex result = log(self.num + sqrt(self.num*self.num + mp_real(1)));
+	return [HNumber numberWithMPComplex:result];
+}
+
+- (HNumber *)inverseHyperbolicCosine
+{
+	// acosh(z) = ln(z + sqrt(z^2 - 1))
+	mp_complex result = log(self.num + sqrt(self.num*self.num - mp_real(1)));
+	return [HNumber numberWithMPComplex:result];
+}
+
+- (HNumber *)inverseHyperbolicTangent
+{
+	// atanh(z) = 1/2*ln((1+z)/(1-z))
+	mp_real one = mp_real(1);
+	mp_complex result = mp_real(0.5)*log((one+self.num)/(one-self.num));
+	return [HNumber numberWithMPComplex:result];
 }
 
 - (HNumber *)gamma  {
     // FIX ME
-    return [HNumber numberFromMPReal:gamma(self.num.real)];
+    return [HNumber numberWithMPReal:gamma(abs(self.num))];
 }
 
 - (HNumber *)erfc  {
     // FIX ME
-    return [HNumber numberFromMPReal:erfc(self.num.real)];
+    return [HNumber numberWithMPReal:erfc(self.num.real)];
 }
 
 - (HNumber *)erf  {
     // FIX ME
-    return [HNumber numberFromMPReal:erf(self.num.real)];
+    return [HNumber numberWithMPReal:erf(self.num.real)];
 }
 
 - (HNumber *)bessel  {
     // FIX ME
-    return [HNumber numberFromMPReal:bessel(self.num.real)];
+    return [HNumber numberWithMPReal:bessel(self.num.real)];
 }
 
 - (HNumber *)besselexp  {
     // FIX ME
-    return [HNumber numberFromMPReal:besselexp(self.num.real)];
+    return [HNumber numberWithMPReal:besselexp(self.num.real)];
 }
 
 - (HNumber *)random  {
-    return [HNumber numberFromHComplex:mp_rand() imaginary:mp_rand()];
+    return [HNumber numberWithMPReal:mp_rand()];
 }
 
 - (HNumber *)floatingModulus:(HNumber *)modulus  {
     // FIX ME
-    return [HNumber numberFromMPReal:fmod(self.num.real, modulus.num.real)];
+    return [HNumber numberWithMPReal:fmod(self.num.real, modulus.num.real)];
 }
 
 - (BOOL)isEqual:(id)object {
@@ -283,7 +532,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 
 #define BASE_NUMBER  (2147483648.0)
 
-- (NSString *)stringFromNumber:(mp_real)real withFormat:(NumberFormat)format {
+- (NSString *)stringWithNumber:(mp_real)real andFormat:(NumberFormat)format {
     BOOL isNegative = real < 0;
     real = abs(real);
     NSString *str = [NSString stringWithCString:real.to_string().c_str() encoding:NSASCIIStringEncoding];
@@ -332,14 +581,18 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 
 - (NSString *)descriptionWithFormat:(NumberFormat)format {
     if (self.num.imag == 0) {
-        return [NSString stringWithFormat:@"%@", [self stringFromNumber:self.num.real withFormat:format]];
+        return [NSString stringWithFormat:@"%@", [self stringWithNumber:self.num.real andFormat:format]];
     } else if (self.num.real == 0) {
-        return [NSString stringWithFormat:@"%@i", [self stringFromNumber:self.num.imag withFormat:format]];
+        return [NSString stringWithFormat:@"%@i", [self stringWithNumber:self.num.imag andFormat:format]];
     } else {
         NSString *sign = self.num.imag > 0 ? @"+" : @"-";
-        NSString *imag = abs(self.num.imag) == 1 ? @"" : [self stringFromNumber:abs(self.num.imag) withFormat:format];
-        return [NSString stringWithFormat:@"%@ %@ %@i", [self stringFromNumber:self.num.real withFormat:format], sign, imag];
+        NSString *imag = abs(self.num.imag) == 1 ? @"" : [self stringWithNumber:abs(self.num.imag) andFormat:format];
+        return [NSString stringWithFormat:@"%@ %@ %@i", [self stringWithNumber:self.num.real andFormat:format], sign, imag];
     }
+}
+
+- (NSString *)stringUsingLocale:(NSDictionary *)locale {
+    return [self description];  // need to add locale
 }
 
 - (NSString *)stringFromDigit:(NSInteger)digit withBase:(NSInteger)base {
@@ -350,9 +603,9 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     return [NSString stringWithCharacters:digitCharacter length:1];
 }
 
-- (NSString *)stringWithBase:(NSInteger)base andFormat:(NumberFormat)format {
+- (NSString *)stringUsingBase:(short)base {
     if (base == 10) {
-        return [self descriptionWithFormat:format];
+        return [self descriptionWithFormat:mode];
     } else {
         NSString *result = @"0";
         mp_int inum = self.num.real;
@@ -363,11 +616,6 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
         }
         return result;
     }
-}
-
-
-- (HNumber *)integer {
-    return [HNumber numberFromMPReal:anint(abs(self.num))];
 }
 
 /* Return the power of the prime number p in the factorization of n! */
@@ -431,13 +679,30 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
         NSInteger nint = integer(n);
         if (nint >= 0 && nint < 79) {
             // accurate to 100 digits
-            return [HNumber numberFromMPInt:[self factorialWith:nint]];
+            return [HNumber numberWithMPInt:[self factorialWith:nint]];
         }
     }
     
     // use the gamma function approximation except for negative integers
-    if (abs(self.num.real - n) != 0 || n >= 0) return [HNumber numberFromMPReal:gamma(self.num.real + 1)];
+    if (abs(self.num.real - n) != 0 || n >= 0) return [HNumber numberWithMPReal:gamma(self.num.real + 1)];
     return [HNumber numberFromInteger:1];
+}
+
+- (HNumber *)nCr:(HNumber *)number
+{
+	// result = n!/(k!(n-k)!)
+	mp_real n = gamma(self.num.real+1);
+	mp_real k = gamma(number.num.real+1);
+	mp_real nk = gamma(self.num.real-number.num.real+1);
+	return [HNumber numberWithMPReal:n/(k*nk)];
+}
+
+- (HNumber *)nPr:(HNumber *)number
+{
+	// result = n!/(n-k)!
+	mp_real n = gamma(self.num.real+1);
+	mp_real nk = gamma(self.num.real-number.num.real+1);
+	return [HNumber numberWithMPReal:n/nk];
 }
 
 - (NSArray *)makeLogical:(mp_int)n {
@@ -456,7 +721,8 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 - (mp_int)makeInteger:(NSArray *)n {
     // convert n into a logical number
     int length = n.count-1;
-    mp_int intValue = mp_int(((NSNumber *)n[length--]).integerValue);
+    int integer = ((NSNumber *)n[length--]).integerValue;
+    mp_int intValue = mp_int(integer);
     mp_int base = mp_int(BASE_NUMBER);
     while (length >= 0) {
         intValue = intValue * base;
@@ -493,33 +759,33 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     return result;
 }
 
-- (HNumber *)setBit:(NSUInteger)bit {
+- (HNumber *)setBit:(HNumber *)bit {
     NSArray *n = [self makeLogical:[self convertFrom:self.num]];
-    NSArray *b = [self makeLogical:pow(mp_int(2), bit)];
+    NSArray *b = [self makeLogical:pow(mp_int(2), integer(bit.num.real))];
     NSArray *result = [self intOp2:n andInt:b usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = n1 | n2;
     }];
     mp_int m = [self makeInteger:result];
-    HNumber *xm = [HNumber numberFromMPInt:m];
+    HNumber *xm = [HNumber numberWithMPInt:m];
     return xm;
 }
 
-- (HNumber *)clearBit:(NSUInteger)bit{
+- (HNumber *)clearBit:(HNumber *)bit{
     NSArray *n = [self makeLogical:[self convertFrom:self.num]];
-    NSArray *b = [self makeLogical:pow(mp_int(2), bit)];
+    NSArray *b = [self makeLogical:pow(mp_int(2), integer(bit.num.real))];
     NSArray *result = [self intOp2:n andInt:b usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = n1 & ~n2;
     }];
-    return [HNumber numberFromMPInt:[self makeInteger:result]];
+    return [HNumber numberWithMPInt:[self makeInteger:result]];
 }
 
-- (HNumber *)toggleBit:(NSUInteger)bit {
+- (HNumber *)toggleBit:(HNumber *)bit {
     NSArray *n = [self makeLogical:[self convertFrom:self.num]];
-    NSArray *b = [self makeLogical:pow(mp_int(2), bit)];
+    NSArray *b = [self makeLogical:pow(mp_int(2), integer(bit.num.real))];
     NSArray *result = [self intOp2:n andInt:b usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = n1 ^ n2;
     }];
-    return [HNumber numberFromMPInt:[self makeInteger:result]];
+    return [HNumber numberWithMPInt:[self makeInteger:result]];
 }
 
 - (NSUInteger)numberOfOneBits {
@@ -548,6 +814,107 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     return size;
 }
 
+- (HNumber *)truncate
+{
+	mp_int inumber(mp_real(abs(self.num)));
+	return [HNumber numberWithMPReal:inumber];
+}
+
+- (HNumber *)moduloWith:(HNumber *)number
+{
+	mp_int inumber(mp_real(abs(self.num)));
+	mp_int inumber2(mp_real(abs(number.num)));
+	return [HNumber numberWithMPReal:mp_int(inumber % inumber2)];
+}
+
+- (HNumber *)integerDivideBy:(HNumber *)number
+{
+	mp_int inumber(mp_real(abs(self.num)));
+	mp_int inumber2(mp_real(abs(number.num)));
+	return [HNumber numberWithMPReal:mp_int(inumber / inumber2)];
+}
+
+- (HNumber *)multiplyByPowerOf2:(NSUInteger)power
+{
+	mp_int inumber(mp_real(abs(self.num)));
+	return [HNumber numberWithMPReal:mp_int(inumber*pow(mp_int(2), power))];
+}
+
+int MaxBits(void) {
+	// This only needs to be done during power-up and precision changes
+	char str[32];
+	int bitSize;
+	
+	sprintf(str, "1E%d", displayLength);
+	mp_int max = mp_int(str)-1;
+	mp_int bits = mp_int(mp_real(log(max)/mp_real::_log2));
+	bitSize = integer(bits);
+	return bitSize;
+}
+
+bool Bit(mp_int& number, short bitnum)
+{
+	HNumber *lnum = [HNumber numberWithMPReal:number];
+	if (bitnum >= MaxBits()) return false;
+	lnum = [lnum andWith:[HNumber numberWithMPReal:pow(mp_real(2), bitnum)]];
+	return (lnum != 0);
+}
+
+- (HNumber *)signedShiftBy:(HNumber *)bits
+{
+	short ShiftCnt;
+	bool SavedBit;
+	mp_int inumber(mp_real(abs(self.num)));
+	mp_int Two(2);
+	mp_int UpperBit = pow(Two, MaxBits()-1);
+	int lbits = integer(mp_real(abs(bits.num)));
+    
+	if (lbits > MaxBits()) {
+		return [HNumber numberWithDouble:1];
+	}
+	
+	SavedBit = (inumber < mp_int(0));
+	for (ShiftCnt=1; ShiftCnt<=lbits; ShiftCnt++) {
+		inumber = inumber / Two;
+		if (SavedBit) inumber += UpperBit;
+	}
+	return [HNumber numberWithMPReal:inumber];
+}
+
+- (HNumber *)rotateBy:(HNumber *)bits
+{
+	short ShiftCnt;
+	bool SavedBit;
+	mp_int inumber = mp_int(mp_real(abs(self.num)));
+	mp_int Two(2);
+	mp_int UpperBit = pow(Two, MaxBits()-1);
+	int lbits = integer(bits.num.real);
+	
+	lbits = lbits % (MaxBits()+1);
+	
+	for (ShiftCnt = 1; ShiftCnt <= lbits; ShiftCnt++) {
+		if (lbits > 0)	{
+			SavedBit = Bit(inumber, 0);
+			inumber = inumber / Two;
+			if (SavedBit) inumber += UpperBit;
+		} else {
+			SavedBit = Bit(inumber, MaxBits()-1);
+			inumber = inumber * Two;
+			if (SavedBit) inumber += 1;
+		}
+	}
+	return [HNumber numberWithMPReal:inumber];
+}
+
+- (HNumber *)shiftBy:(HNumber *)bits
+{
+	mp_real inumber = mp_real(abs(self.num));
+	int lbits = integer(bits.num.real);
+	
+	if (abs(lbits) > MaxBits()) return [HNumber zero];
+	return [HNumber numberWithMPReal:inumber * pow(mp_real(2), lbits)];
+}
+
 - (mp_int)convertFrom:(mp_complex)c {
     mp_real n = abs(c);
     return mp_int(n);
@@ -560,7 +927,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
         *res = n1 & n2;
     }];
     mp_int iresult = [self makeInteger:result];
-    return [HNumber numberFromMPInt:[self makeInteger:result]];
+    return [HNumber numberWithMPInt:[self makeInteger:result]];
 }
 
 - (HNumber *)orWith:(HNumber *)number {
@@ -569,7 +936,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = n1 | n2;
     }];
-    return [HNumber numberFromMPInt:[self makeInteger:result]];
+    return [HNumber numberWithMPInt:[self makeInteger:result]];
 }
 
 - (HNumber *)xorWith:(HNumber *)number {
@@ -578,7 +945,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = n1 ^ n2;
     }];
-    return [HNumber numberFromMPInt:[self makeInteger:result]];
+    return [HNumber numberWithMPInt:[self makeInteger:result]];
 }
 
 - (HNumber *)norWith:(HNumber *)number {
@@ -587,7 +954,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = ~(n1 | n2);
     }];
-    return [HNumber numberFromMPInt:[self makeInteger:result]];
+    return [HNumber numberWithMPInt:[self makeInteger:result]];
 }
 
 - (HNumber *)nandWith:(HNumber *)number {
@@ -596,7 +963,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = ~(n1 & n2);
     }];
-    return [HNumber numberFromMPInt:[self makeInteger:result]];
+    return [HNumber numberWithMPInt:[self makeInteger:result]];
 }
 
 - (HNumber *)xnorWith:(HNumber *)number {
@@ -605,15 +972,51 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     NSArray *result = [self intOp2:n1 andInt:n2 usingOperation:^(NSInteger n1, NSInteger n2, NSInteger *res) {
         *res = ~(n1 ^ n2);
     }];
-    return [HNumber numberFromMPInt:[self makeInteger:result]];
+    return [HNumber numberWithMPInt:[self makeInteger:result]];
 }
 
 - (HNumber *)onesComplement {
-    return [HNumber numberFromMPComplex:-self.num-mp_int(1)];
+    return [HNumber numberWithMPComplex:-self.num-mp_int(1)];
 }
 
 - (HNumber *)twosComplement {
-    return [HNumber numberFromMPComplex:-self.num];
+    return [HNumber numberWithMPComplex:-self.num];
+}
+
+- (HNumber *)fibonacci
+{
+	mp_int Zero(0);
+	mp_int rp(Zero), rn, u = self.num.real;
+	mp_int Result;
+	mp_int One(1);
+	
+	if (u <= Zero)
+		return [HNumber zero];
+	else {
+		// iterative Fibonacci series
+		Result = mp_int(1);
+		for (;;) {
+			u = u - One;
+			if (u == Zero) break;
+			rn = Result + rp;
+			rp = Result; Result = rn;
+		}
+	}
+	return [HNumber numberWithMPReal:Result];
+}
+
+- (HNumber *)GCD:(HNumber *) number
+{
+	mp_int nop1(mp_real(self.num.real));
+	mp_int nop2(mp_real(number.num.real));
+	mp_int Zero(0);
+	mp_int Result;
+    
+	while (nop2 != Zero) {
+		Result = nop1 % nop2;
+		nop1 = nop2; nop2 = Result;
+	}
+	return [HNumber numberWithMPReal:nop1];
 }
 
 

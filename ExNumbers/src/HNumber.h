@@ -12,10 +12,23 @@
 
 typedef enum {FORMAT_STANDARD, FORMAT_SCIENTIFIC, FORMAT_ENGINEERING} NumberFormat;
 
-// NOTE: MUST BE CALLED BEFORE ANYTHING ELSE
-+ (void)initWithDigits:(NSUInteger)digits;
+// Number formatting methods
++ (NSInteger)displayLength;
++ (NSInteger)decimalPoints;
++ (NSString *)decimalPoint;
++ (NSString *)groupingSeparator;
++ (NumberFormat)format;
+
++ (void) setDisplayLength:(NSInteger)len;
++ (void) setDecimalPoints:(NSInteger)decimals;
++ (void) setDecimalPoint:(NSString*)dp;
++ (void) setGroupingSeparator:(NSString*)groupSep;
++ (void) setFormat : (NumberFormat)mode;
 
 + (id)zero;
++ (id)one;
++ (id)i;
++ (id)exp;
 + (id)pi;
 + (id)log2;
 + (id)log10;
@@ -27,48 +40,72 @@ typedef enum {FORMAT_STANDARD, FORMAT_SCIENTIFIC, FORMAT_ENGINEERING} NumberForm
 + (id)numberWithDouble:(double)real imaginary:(double)imaginary;
 + (id)numberWithString:(NSString *)string;
 + (id)numberWithString:(NSString *)string locale:(NSDictionary *)locale;
++ (id)numberWithString:(NSString *)string usingBase:(short)base;
 
 
 - (id)initWithNumber:(HNumber *)number;
 - (id)initWithInteger:(unsigned long long)integer exponent:(NSInteger)exponent isNegative:(BOOL)isNegative;
 - (id)initWithDouble:(double)number;
 - (id)initWithDouble:(double)real imaginary:(double)imaginary;
-- (id)initWithString:(NSString *)real imaginaryString:(NSString *)imaginary;
+- (id)initWithString:(NSString *)string;
+- (id)initWithString:(NSString *)string locale:(NSDictionary *)locale;
+- (id)initWithString:(NSString *)string usingBase:(short)base;
 
 - (NSString *)description;
-- (NSString *)stringWithBase:(NSInteger)base andFormat:(NumberFormat)format;
+- (NSString *)stringUsingBase:(short)base;
+- (NSString *)stringUsingLocale:(NSDictionary *)locale;
 
-- (HNumber *)real;
-- (HNumber *)imaginary;
-- (HNumber *)integer;
+- (HNumber *)realPart;
+- (HNumber *)imaginaryPart;
+- (double)doubleValue;
 
 - (HNumber *)add:(HNumber *)complex;
 - (HNumber *)subtract:(HNumber *)complex;
-- (HNumber *)multiply:(HNumber *)complex;
-- (HNumber *)divide:(HNumber *)complex;
+- (HNumber *)multiplyBy:(HNumber *)complex;
+- (HNumber *)divideBy:(HNumber *)complex;
+- (HNumber *)conjugate;
 
 - (HNumber *)exponential;
 - (HNumber *)naturalLogarithm;
 - (HNumber *)base10Logarithm;
+- (HNumber *)base2Logarithm;
 - (HNumber *)sine;
 - (HNumber *)cosine;
-- (HNumber *)squared;
-- (HNumber *)squareRoot;
-- (HNumber *)absolute;
-- (HNumber *)argument;
-- (HNumber *)powerToExponent:(HNumber *)exponent;
-
-- (BOOL)isEqual:(id)object;
-
-// functions only in real number domain -- for now
 - (HNumber *)tangent;
 - (HNumber *)hyperbolicSine;
 - (HNumber *)hyperbolicCosine;
 - (HNumber *)hyperbolicTangent;
-- (HNumber *)arcTangent;
-- (HNumber *)arcTangentWithY:(HNumber *)y;
-- (HNumber *)arcSine;
-- (HNumber *)arcCosine;
+- (HNumber *)inverseSine;
+- (HNumber *)inverseCosine;
+- (HNumber *)inverseTangent;
+- (HNumber *)inverseHyperbolicSine;
+- (HNumber *)inverseHyperbolicCosine;
+- (HNumber *)inverseHyperbolicTangent;
+
+- (HNumber *)squared;
+- (HNumber *)squareRoot;
+- (HNumber *)cubed;
+- (HNumber *)cubeRoot;
+- (HNumber *)anyRoot:(short)root;
+
+- (HNumber *)absoluteValue;
+- (HNumber *)argument;
+- (HNumber *)round;
+- (HNumber *)truncate;
+
+- (HNumber *)signOfRealPart;
+- (HNumber *)minimumOfRealParts:(HNumber *)number;
+- (HNumber *)maximumOfRealParts:(HNumber *)number;
+
+- (HNumber *)multiplyByPowerOf10:(NSUInteger)power;
+- (HNumber *)multiplyByPowerOf2:(NSUInteger)power;
+- (HNumber *)raiseToPower:(HNumber *)exponent;
+- (HNumber *)raiseToIntegerPower:(NSInteger)power;
+- (HNumber *)raiseToDoublePower:(double)power;
+
+- (BOOL)isEqual:(id)object;
+
+// functions only in real number domain -- for now
 - (HNumber *)random;
 - (HNumber *)floatingModulus:(HNumber *)modulus;
 
@@ -83,12 +120,21 @@ typedef enum {FORMAT_STANDARD, FORMAT_SCIENTIFIC, FORMAT_ENGINEERING} NumberForm
 - (BOOL)isLessThan:(HNumber *)object;
 
 // integer-based operations -- result will be an integer
-- (HNumber *)setBit:(NSUInteger)bit;
-- (HNumber *)clearBit:(NSUInteger)bit;
-- (HNumber *)toggleBit:(NSUInteger)bit;
+- (HNumber *)integerDivideBy:(HNumber *)number;
+- (HNumber *)moduloWith:(HNumber *)number;
+- (HNumber *)shiftBy:(HNumber *)bits;
+- (HNumber *)signedShiftBy:(HNumber *)bits;
+- (HNumber *)rotateBy:(HNumber *)bits;
+- (HNumber *)setBit:(HNumber *)bit;
+- (HNumber *)clearBit:(HNumber *)bit;
+- (HNumber *)toggleBit:(HNumber *)bit;
 - (NSUInteger)numberOfOneBits;
 - (NSUInteger)sizeInBits;
 - (HNumber *)factorial;
+- (HNumber *)nCr:(HNumber *)number;
+- (HNumber *)nPr:(HNumber *)number;
+- (HNumber *)GCD:(HNumber *)number;
+- (HNumber *)fibonacci;
 
 - (HNumber *)andWith:(HNumber *)number;
 - (HNumber *)orWith:(HNumber *)number;

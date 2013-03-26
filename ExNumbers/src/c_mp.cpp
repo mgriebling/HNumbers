@@ -1144,7 +1144,7 @@ ARPREC_API void c_mpinp(const double *q) {
 ARPREC_API void c_mpout(const double *q) {
   FPU_FIX_START;
   mp_real mp_q(q);
-  int old_prec = cout.precision();
+  long old_prec = cout.precision();
   cout.precision(mp::mpgetoutputprec());
   cout << mp_q;
   cout.precision(old_prec);
