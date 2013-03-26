@@ -296,16 +296,28 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
         fraction = [NSString stringWithFormat:@"%@×10^%@", [trunc substringFromIndex:location.location+3], exp];
     } else if (format == FORMAT_ENGINEERING) {
         NSInteger expValue = exp.integerValue;
-        NSInteger adjust = 3 - expValue % 3;
-        NSString *fraction = [[trunc substringFromIndex:location.location+3] stringByReplacingOccurrencesOfString:@"." withString:@""];
-        expValue += adjust;
-        fraction = [NSString stringWithFormat:@"%@.%@×10^%d", [fraction substringToIndex:expValue], [fraction substringFromIndex:expValue], expValue];
+        NSInteger adjust = expValue % 3;
+        fraction = [[trunc substringFromIndex:location.location+3] stringByReplacingOccurrencesOfString:@"." withString:@""];
+        if (adjust < 0) adjust += 3;
+        expValue -= adjust; adjust++;
+        fraction = [NSString stringWithFormat:@"%@.%@×10^%d", [fraction substringToIndex:adjust], [fraction substringFromIndex:adjust], expValue];
     } else {
         NSInteger expValue = exp.integerValue;
-        NSString *fraction = [[trunc substringFromIndex:location.location+3] stringByReplacingOccurrencesOfString:@"." withString:@""];
-        if (expValue < fraction.length) {
+        fraction = [[trunc substringFromIndex:location.location+3] stringByReplacingOccurrencesOfString:@"." withString:@""];
+        if (expValue == 0) {
+            // leave number as is
+        } else if (expValue < 0) {
+            // pad with zeros as needed for fraction
+            fraction = [[@"0." stringByPaddingToLength:-expValue+1 withString:@"0" startingAtIndex:0] stringByAppendingString:fraction];
+        } else if (expValue < fraction.length) {
             // use floating decimal point output
-            fraction = [NSString stringWithFormat:@"%@.%@", [fraction substringToIndex:expValue], [fraction substringFromIndex:expValue]];
+            expValue++;
+            if (expValue < fraction.length) {
+                fraction = [NSString stringWithFormat:@"%@.%@", [fraction substringToIndex:expValue], [fraction substringFromIndex:expValue]];
+            }
+        } else if (expValue < mp::mpgetprec()) {
+            // add zeros to number
+            fraction = [fraction stringByPaddingToLength:expValue+1 withString:@"0" startingAtIndex:0];
         } else {
             fraction = [NSString stringWithFormat:@"%@×10^%@", [trunc substringFromIndex:location.location+3], exp];            
         }
