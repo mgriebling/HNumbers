@@ -29,13 +29,13 @@
 #define DoubleToComplex(a)  (mp_complex(a, a + mp::fmpwds5))
 #define MALLOC(type, n)  ((type *) std::malloc((n) * sizeof(type)))
 
-#ifdef ALWAYS_FIX_FPU
-#define FPU_FIX_START unsigned int oldcw; fpu_fix_start(&oldcw)
-#define FPU_FIX_STOP  fpu_fix_end(&oldcw)
-#else
+//#ifdef ALWAYS_FIX_FPU
+//#define FPU_FIX_START unsigned int oldcw; fpu_fix_start(&oldcw)
+//#define FPU_FIX_STOP  fpu_fix_end(&oldcw)
+//#else
 #define FPU_FIX_START 
 #define FPU_FIX_STOP  
-#endif
+//#endif
 
 using std::cout;
 using std::endl;

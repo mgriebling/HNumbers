@@ -97,10 +97,10 @@ typedef enum {FORMAT_STANDARD, FORMAT_SCIENTIFIC, FORMAT_ENGINEERING} NumberForm
 - (HNumber *)minimumOfRealParts:(HNumber *)number;
 - (HNumber *)maximumOfRealParts:(HNumber *)number;
 
-- (HNumber *)multiplyByPowerOf10:(NSUInteger)power;
-- (HNumber *)multiplyByPowerOf2:(NSUInteger)power;
+- (HNumber *)multiplyByPowerOf10:(int)power;
+- (HNumber *)multiplyByPowerOf2:(int)power;
 - (HNumber *)raiseToPower:(HNumber *)exponent;
-- (HNumber *)raiseToIntegerPower:(NSInteger)power;
+- (HNumber *)raiseToIntegerPower:(int)power;
 - (HNumber *)raiseToDoublePower:(double)power;
 
 - (BOOL)isEqual:(id)object;

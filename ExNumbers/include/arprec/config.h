@@ -2,7 +2,7 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define to 1 to use FPU fix whenever C interface is called. */
-/* #undef ALWAYS_FIX_FPU */
+#undef ALWAYS_FIX_FPU
 
 /* Any special symbols needed for exporting APIs. */
 #define ARPREC_API /**/
@@ -61,7 +61,7 @@
 #define HAVE_FORTRAN 1
 
 /* Define to 1 if you have the <fpu_control.h> header file. */
-/* #undef HAVE_FPU_CONTROL_H */
+#undef HAVE_FPU_CONTROL_H
 
 /* Define to 1 if you have the <fp.h> header file. */
 /* #undef HAVE_FP_H */

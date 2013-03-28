@@ -1,13 +1,13 @@
 //
-//  HMNumbers.h
-//  HMNumbers
+//  HNumber.h
+//  HNumber
 //
-//  Created by Mike Griebling on 24.3.2013.
+//  Created by Michael Griebling on 28Mar2013.
 //  Copyright (c) 2013 Computer Inspirations. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-@interface HMNumbers : NSObject
+@interface HNumber : NSObject
 
 @end

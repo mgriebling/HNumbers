@@ -29,7 +29,7 @@ static HNumber *piConst;
 static HNumber *iConst;
 static HNumber *expConst;
 
-#define NSInteger int
+//#define NSInteger int
 
 typedef void (^LogicalOp2)(NSInteger n1, NSInteger n2, NSInteger *res);
 typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
@@ -150,7 +150,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 	return [self initWithMPReal:real];
 }
 
-- (id)initWithInteger:(NSInteger)integer {
+- (id)initWithInteger:(int)integer {
     return [self initWithInteger:abs(integer) exponent:0 isNegative:integer < 0];    
 }
 
@@ -275,7 +275,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     return [HNumber numberWithMPReal:self.num.real imaginary:-self.num.imag];
 }
 
-+ (id)numberFromInteger:(NSInteger)integer {
++ (id)numberFromInteger:(int)integer {
     return [[HNumber alloc] initWithInteger:integer];
 }
 
@@ -381,12 +381,12 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 		return [HNumber numberWithMPReal:number.num.real];
 }
 
-- (HNumber *)multiplyByPowerOf10:(NSUInteger)power
+- (HNumber *)multiplyByPowerOf10:(int)power
 {
-	return [HNumber numberWithMPComplex:self.num * pow(10.0, power)];
+	return [HNumber numberWithMPComplex:self.num * pow(mp_real(10.0), power)];
 }
 
-- (HNumber *)raiseToIntegerPower:(NSInteger)power
+- (HNumber *)raiseToIntegerPower:(int)power
 {
 	return [HNumber numberWithMPComplex:pow(self.num, power)];
 }
@@ -544,7 +544,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     if (format == FORMAT_SCIENTIFIC) {
         fraction = [NSString stringWithFormat:@"%@×10^%@", [trunc substringFromIndex:location.location+3], exp];
     } else if (format == FORMAT_ENGINEERING) {
-        NSInteger expValue = exp.integerValue;
+        int expValue = exp.intValue;
         NSInteger adjust = expValue % 3;
         fraction = [[trunc substringFromIndex:location.location+3] stringByReplacingOccurrencesOfString:@"." withString:@""];
         if (adjust < 0) adjust += 3;
@@ -595,7 +595,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     return [self description];  // need to add locale
 }
 
-- (NSString *)stringFromDigit:(NSInteger)digit withBase:(NSInteger)base {
+- (NSString *)stringFromDigit:(int)digit withBase:(NSInteger)base {
     if (base < 2 || base > 36 || digit >= base) return @"?";
     if (base <= 10) return [NSString stringWithFormat:@"%d", digit];
     if (base <= 16) return [NSString stringWithFormat:@"%X", digit];
@@ -656,7 +656,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     return result;
 }
 
-- (mp_int) factorialWith:(NSInteger) n {
+- (mp_int) factorialWith:(int) n {
     unsigned char* primes = [self prime_table:n];
     int p;
     mp_int result   = mp_int(1);
@@ -676,7 +676,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
     mp_real n = anint(self.num.real);
     if (abs(self.num.real - n) == 0) {
         // use integer factorial
-        NSInteger nint = integer(n);
+        int nint = integer(n);
         if (nint >= 0 && nint < 79) {
             // accurate to 100 digits
             return [HNumber numberWithMPInt:[self factorialWith:nint]];
@@ -720,13 +720,13 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 
 - (mp_int)makeInteger:(NSArray *)n {
     // convert n into a logical number
-    int length = n.count-1;
-    int integer = ((NSNumber *)n[length--]).integerValue;
+    int length = (int)n.count-1;
+    int integer = ((NSNumber *)n[length--]).intValue;
     mp_int intValue = mp_int(integer);
     mp_int base = mp_int(BASE_NUMBER);
     while (length >= 0) {
         intValue = intValue * base;
-        intValue += ((NSNumber *)n[length--]).integerValue;
+        intValue += ((NSNumber *)n[length--]).intValue;
     }
     return intValue;
 }
@@ -834,7 +834,7 @@ typedef void (^LogicalOp1)(NSInteger n, NSInteger *res);
 	return [HNumber numberWithMPReal:mp_int(inumber / inumber2)];
 }
 
-- (HNumber *)multiplyByPowerOf2:(NSUInteger)power
+- (HNumber *)multiplyByPowerOf2:(int)power
 {
 	mp_int inumber(mp_real(abs(self.num)));
 	return [HNumber numberWithMPReal:mp_int(inumber*pow(mp_int(2), power))];
@@ -845,7 +845,7 @@ int MaxBits(void) {
 	char str[32];
 	int bitSize;
 	
-	sprintf(str, "1E%d", displayLength);
+	sprintf(str, "1E%ld", (unsigned long)displayLength);
 	mp_int max = mp_int(str)-1;
 	mp_int bits = mp_int(mp_real(log(max)/mp_real::_log2));
 	bitSize = integer(bits);
